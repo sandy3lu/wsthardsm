@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+message BoolValue {
+    bool value = 1;
+}
+
+message IntValue {
+    int32 value = 1;
+}
+
+message StrValue {
+    string value = 1;
+}
+
+message KeyPair {
+    string public_key = 1;
+    string private_key = 2;
+}
+
+message Response {
+    int32 code = 1;
+    string msg = 2;
+    string details = 3;
+    oneof data {    // "oneof" is just like "union" in C Language
+        BoolValue bool_value = 4;
+        IntValue int_value = 5;
+        StrValue str_value = 6;
+        KeyPair key_pair = 7;
+    }
+}
