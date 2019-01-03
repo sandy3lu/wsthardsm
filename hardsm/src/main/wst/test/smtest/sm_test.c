@@ -7,9 +7,8 @@
 
 
 int main(int argc, char **argv) {
-
+    test_error();
     test_util();
     test_device();
-    test_error();
     return 0;
 }

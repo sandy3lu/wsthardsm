@@ -41,8 +41,7 @@ void compress_date(const char *date, char *compressed_date, int *len) {
     }
 }
 
-void decompress_date(const char *compressed_date, int compressed_date_len,
-                     char *date, int date_len) {
+void decompress_date(const char *compressed_date, int compressed_date_len, char *date, int date_len) {
     assert(compressed_date_len * 2 + 1 <= date_len);
 
     int i;
@@ -115,8 +114,7 @@ int from_hex(char *buf, int *len, const char *hex_str) {
 }
 
 
-void print_log(int level, const char* filename, const char* func_name,
-               int line, const char* fmt, ...) {
+void print_log(int level, const char* filename, const char* func_name, int line, const char* fmt, ...) {
     char* pc_level;
     switch (level) {
         case LOG_LEVEL_DEBUG:

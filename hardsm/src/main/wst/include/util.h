@@ -37,8 +37,7 @@ enum LOG_LEVEL {
     LOG_LEVEL_FATAL
 };
 
-void print_log(int level, const char* filename,
-               const char* func_name, int line, const char* fmt, ...);
+void print_log(int level, const char* filename, const char* func_name, int line, const char* fmt, ...);
 
 #define LOG_DEBUG(...) \
     print_log(LOG_LEVEL_DEBUG, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
@@ -65,8 +64,7 @@ void date_today(char *date, int len);
 void compress_date(const char *date, char *compressed_date, int *len);
 
 /* decompress date to yyyymmdd */
-void decompress_date(const char *compressed_date, int compressed_date_len,
-                     char *date, int date_len);
+void decompress_date(const char *compressed_date, int compressed_date_len, char *date, int date_len);
 
 void to_hex(char *buf, int buf_len, const char *data, int data_len);
 
