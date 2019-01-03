@@ -14,18 +14,20 @@ SM_SRC = $(wildcard sm/*.c)
 PROTO_SRC = $(wildcard proto/*.c)
 UTIL_SRC = $(wildcard util/*.c)
 SOURCE = $(PROTO_SRC) $(SM_SRC) $(UTIL_SRC)
-TEST_SRC = $(wildcard test/*.c)
+SMTEST_SRC = $(wildcard test/smtest/*.c)
+SMTOOL_SRC = $(wildcard test/smtool/*.c)
 
 PROTO_OBJ = $(subst proto/, $(OUT_DIR)/, $(addsuffix .o, $(basename $(PROTO_SRC))))
 SM_OBJ = $(subst sm/, $(OUT_DIR)/, $(addsuffix .o, $(basename $(SM_SRC))))
 UTIL_OBJ = $(subst util/, $(OUT_DIR)/, $(addsuffix .o, $(basename $(UTIL_SRC))))
 OBJ = $(PROTO_OBJ) $(SM_OBJ) $(UTIL_OBJ)
-TEST_OBJ = $(subst test/, $(OUT_DIR)/, $(addsuffix .o, $(basename $(TEST_SRC))))
+SMTEST_OBJ = $(subst test/smtest, $(OUT_DIR)/, $(addsuffix .o, $(basename $(SMTEST_SRC))))
+SMTOOL_OBJ = $(subst test/smtool, $(OUT_DIR)/, $(addsuffix .o, $(basename $(SMTOOL_SRC))))
 
 # --- target ---
 YJSMWST_LIB = $(TARGET_DIR)/libyjsmwst.so
 SM_TOOL = $(TARGET_DIR)/smtool
-SM_TEST = $(TARGET_DIR)/sm_test
+SM_TEST = $(TARGET_DIR)/smtest
 
 # --- commands ---
 MKDIR_CMD = mkdir -p $@
@@ -51,20 +53,20 @@ $(OUT_DIR) $(TARGET_DIR):
 
 
 # --- demo ---
-demo: sm_test smtool
+demo: smtest smtool
 
-sm_test : $(OUT_DIR)/sm_test.o $(LIB_DIR)/libyjsmwst.so $(LIB_DIR)/libsmwst.so | $(TARGET_DIR)
+smtest : $(SMTEST_OBJ) $(LIB_DIR)/libyjsmwst.so $(LIB_DIR)/libsmwst.so | $(TARGET_DIR)
 	$(CC) -o $(SM_TEST) $^
 	cp $(SM_TEST) $(LIB_DIR)
 
-smtool : $(OUT_DIR)/smtool.o $(LIB_DIR)/libyjsmwst.so $(LIB_DIR)/libsmwst.so | $(TARGET_DIR)
+smtool : $(SMTOOL_OBJ) $(LIB_DIR)/libyjsmwst.so $(LIB_DIR)/libsmwst.so | $(TARGET_DIR)
 	$(CC) -o $(SM_TOOL) $^
 	cp $(SM_TOOL) $(LIB_DIR)
 
-$(OUT_DIR)/sm_test.o : test/sm_test.c | $(OUT_DIR)
+$(OUT_DIR)/%.o : test/smtest/%.c | $(OUT_DIR)
 	$(CC) -c -Wall -o $@ $<
 
-$(OUT_DIR)/smtool.o : test/smtool.c | $(OUT_DIR)
+$(OUT_DIR)/%.o : test/smtool/%.c | $(OUT_DIR)
 	$(CC) -c -Wall -o $@ $<
 
 

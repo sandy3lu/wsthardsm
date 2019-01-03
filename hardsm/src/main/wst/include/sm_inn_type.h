@@ -6,7 +6,7 @@
  *  \date       2011-08-24
  *  \note       define some macro, data type by api5.2.
  *
- *  History:        
+ *  History:
  *
  *  [OS macro]
  *  WIN32       windows 32

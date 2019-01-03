@@ -6,7 +6,7 @@
  *  \date       2011-08-01
  *  \note       define some macro,structure and functions exported by api5.2.
  *
- *  History:        
+ *  History:
  *  1. 2011-06-28:    created by Huo-Weihua
  *  2. 2011-08-01:  repalce SM_ULONG with SM_UINT by zhangjuan
  *

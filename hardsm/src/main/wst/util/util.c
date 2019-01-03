@@ -4,17 +4,7 @@
 #include <time.h>
 #include <stdarg.h>
 #include <assert.h>
-#include "../include/sm_api.h"
-#include "../proto/sm.pb-c.h"
 #include "../include/util.h"
-
-
-Result handle_result(Result result) {
-    Result new_result;
-    new_result.code = UNIFY_ERROR_CODE(result.code);
-    strcpy(new_result.msg, GET_ERROR_STR(result.code, result.msg));
-    return new_result;
-}
 
 
 /* YYYYMMDDhhmmss */
@@ -48,7 +38,7 @@ void compress_date(const char *date, char *compressed_date, int *len) {
     int i;
     for (i = 0; i < strlen(date); i += 2) {
         compressed_date[i/2] = (((date[i] - 0x30) << 4) | (date[i + 1] - 0x30));
-    } // for
+    }
 }
 
 void decompress_date(const char *compressed_date, int compressed_date_len,
@@ -69,40 +59,8 @@ void decompress_date(const char *compressed_date, int compressed_date_len,
 Result init_result() {
     Result result;
     result.code = YERR_SUCCESS;
-    strncpy(result.msg, SUCCESS_MSG, sizeof(result.msg));
+    strncpy(result.msg, "", sizeof(result.msg));
     return result;
-}
-
-
-int count_chips(const char *string, char separator) {
-    assert(NULL != string);
-
-    int count = 1;
-    while (*string != 0) {
-        if (*string == separator) count++;
-        string++;
-    }
-
-    return count;
-}
-
-
-const char *next_chip(const char *string, char separator, char *chip) {
-    if (NULL == string) return NULL;
-
-    const char *cursor = string;
-    while (*cursor != 0) {
-        if (*cursor == separator) {
-            strncpy(chip, string, cursor - string);
-            return cursor + 1;
-        } else {
-            cursor++;
-        }
-    }
-    strncpy(chip, string, cursor - string);
-
-    if (*cursor == 0) return NULL;
-    return cursor;
 }
 
 
@@ -112,7 +70,7 @@ static const char hex_table[16] = {
 };
 
 
-bool ishex(const char *str) {
+bool is_hex(const char *str) {
     if (NULL == str) return true;
     if (strlen(str) & 0x01) return false;
 
@@ -141,15 +99,14 @@ void to_hex(char *buf, int buf_len, const char *data, int data_len) {
 }
 
 
-int from_hex(char *buf, int *len, const char *hexdata) {
-    assert(NULL != hexdata);
-    int err = YERR_SUCCESS;
+int from_hex(char *buf, int *len, const char *hex_str) {
+    assert(NULL != hex_str);
 
-    if (!ishex(hexdata)) return YERR_FORMAT_ERROR;
+    if (!is_hex(hex_str)) return YERR_FORMAT_ERROR;
 
     int i;
-    for (i = 0; i < strlen(hexdata); i++) {
-        char c = hexdata[i];
+    for (i = 0; i < strlen(hex_str); i++) {
+        char c = hex_str[i];
         c = tolower(c);
         int val = c > '9'? 10 + c - 'a' : c - '0';
 
@@ -160,36 +117,37 @@ int from_hex(char *buf, int *len, const char *hexdata) {
             *buf = (val << 4);
         }
     }
-    *len = strlen(hexdata) / 2;
-    return err;
+    *len = strlen(hex_str) / 2;
+
+    return YERR_SUCCESS;
 }
 
 
 void print_log(int level, const char* filename, const char* func_name,
                int line, const char* fmt, ...) {
-    char* pclevel;
+    char* pc_level;
     switch (level) {
         case LOG_LEVEL_DEBUG:
-            pclevel = "[DEBUG]";
+            pc_level = "[DEBUG]";
             break;
         case LOG_LEVEL_INFO:
-            pclevel = "[INFO]";
+            pc_level = "[INFO]";
             break;
         case LOG_LEVEL_WARN:
-            pclevel = "[WARNING]";
+            pc_level = "[WARNING]";
             break;
         case LOG_LEVEL_ERROR:
-            pclevel = "[ERROR]";
+            pc_level = "[ERROR]";
             break;
         default:
-            pclevel = "INFO";
+            pc_level = "INFO";
             break;
     }
 
     time_t rawtime;
     time(&rawtime);
 
-    fprintf(stderr, "%s %s, %s, %d | %s", pclevel, filename,
+    fprintf(stderr, "%s %s, %s, %d | %s", pc_level, filename,
             func_name, line, ctime(&rawtime));
     va_list ap;
     va_start(ap, fmt);

@@ -6,9 +6,9 @@
  *  \date       2011-06-29
  *  \note       define some algorithm macro by api5.2.
  *
- *  History:        
+ *  History:
  *  1. 2011-06-29:  created by Chen-Daoyuan
- *  2. 2011-09-19:  modified by Chen-Daoyuan  
+ *  2. 2011-09-19:  modified by Chen-Daoyuan
  */
 
 #ifndef _SM_ALGO_H_
@@ -46,11 +46,11 @@
 
 #define SM_KEY_ALG35            0x00000109      /* Key length 16bytes */
 
-#define SM_KEY_ECC_PUBLIC       0x00000005 
-#define SM_KEY_ECC_PRIVATE      0x00000006 
+#define SM_KEY_ECC_PUBLIC       0x00000005
+#define SM_KEY_ECC_PRIVATE      0x00000006
 
 /* ///////////////////////////////////////////////////////////////////////// */
-/* Algorithm character */ 
+/* Algorithm character */
 /* ///////////////////////////////////////////////////////////////////////// */
 /* SM1 */
 #define SMMA_ALG34_BLOCK_LEN            16
@@ -60,7 +60,7 @@
 
 
 /* SM2 */
-#define SMMA_ECC_FP_256_MODULUS_BITS    256    
+#define SMMA_ECC_FP_256_MODULUS_BITS    256
 #define SMMA_ECC_FP_256_BLOCK_LEN       ((SMMA_ECC_FP_256_MODULUS_BITS + 7) / 8)
 #define SMMA_ECC_FP_256_ENC_MIN_LEN     1
 #define SMMA_ECC_FP_256_ENC_MAX_LEN     128
@@ -82,4 +82,4 @@
 #define SMMA_ALG35_IV_LEN               SMMA_ALG35_BLOCK_LEN
 #define SMMA_ALG35_MAC_VALUE_LEN        16
 
-#endif 
+#endif
