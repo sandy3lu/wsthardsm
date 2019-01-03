@@ -6,6 +6,8 @@ extern "C" {
 #endif
 
 void test_util();
+void test_device();
+void test_error();
 
 #ifdef __cplusplus
 }

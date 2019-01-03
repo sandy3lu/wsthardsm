@@ -56,14 +56,6 @@ void decompress_date(const char *compressed_date, int compressed_date_len,
     *date = 0;
 }
 
-Result init_result() {
-    Result result;
-    result.code = YERR_SUCCESS;
-    strncpy(result.msg, "", sizeof(result.msg));
-    return result;
-}
-
-
 static const char hex_table[16] = {
     '0', '1', '2', '3', '4', '5', '6', '7',
     '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'

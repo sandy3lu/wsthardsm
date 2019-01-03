@@ -28,11 +28,6 @@ typedef int bool;
 #define YERR_FORMAT_ERROR           501
 #define NO_DEVICE_ERROR             601
 
-typedef struct {
-    int code;
-    char msg[128 + 1];
-} Result;
-
 
 enum LOG_LEVEL {
     LOG_LEVEL_DEBUG,
@@ -60,8 +55,6 @@ void print_log(int level, const char* filename,
 #define LOG_FATAL(...) \
     print_log(LOG_LEVEL_FATAL, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 
-Result init_result();
-
 /* YYYYMMDDhhmmss */
 void get_localtime(char *time_str, int len);
 
@@ -80,6 +73,12 @@ void to_hex(char *buf, int buf_len, const char *data, int data_len);
 int from_hex(char *buf, int *len, const char *hexdata);
 
 bool is_hex(const char *str);
+
+void init_error_string();
+
+char *get_error_string(int code);
+
+void print_error(int code);
 
 #ifdef __cplusplus
 }
