@@ -21,9 +21,11 @@ typedef struct {
 } DeviceContext;
 
 
-int open_devices(DeviceContext device_list[], int device_count);
+int open_devices(DeviceContext *device_list, int device_count);
 
-int close_devices(DeviceContext device_list[], int device_count);
+int close_devices(DeviceContext *device_list, int device_count);
+
+int refresh_device_contexts(DeviceContext *device_list, int device_count);
 
 #ifdef __cplusplus
 }

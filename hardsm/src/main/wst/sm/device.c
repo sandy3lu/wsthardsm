@@ -5,6 +5,14 @@
 #include "../include/device.h"
 
 
+static void update_error_code(int *codes, int *codes_len, int max_codes_len, int code) {
+    if (*codes_len >= max_codes_len) {
+        *codes_len = 0;
+    }
+    codes[(*codes_len)++] = code;
+}
+
+
 static void open_device(DeviceContext *device_context) {
     int error_code = SM_OpenDevice(device_context->index, false, &(device_context->h_device));
     if (error_code != YERR_SUCCESS) {
@@ -22,7 +30,7 @@ static void get_mechanisms(DeviceContext *device_context) {
     int mechanisms_len = 0;
     int error_code = SM_GetMechanismList(device_context->h_device, (PSM_UINT)mechanism_list, (PSM_WORD)&(mechanisms_len));
     if (error_code != YERR_SUCCESS) {
-        device_context->codes[(device_context->codes_len)++] = error_code;
+        update_error_code(device_context->codes, &(device_context->codes_len), MAX_CODE_LEN, error_code);
         return;
     }
 
@@ -33,7 +41,7 @@ static void get_mechanisms(DeviceContext *device_context) {
         error_code = SM_GetMechanismInfo(device_context->h_device, mechanism_list[i],
                                          &(device_context->mechanism_list[i]));
         if (error_code != YERR_SUCCESS) {
-            device_context->codes[(device_context->codes_len)++] = error_code;
+            update_error_code(device_context->codes, &(device_context->codes_len), MAX_CODE_LEN, error_code);
         }
     }
 }
@@ -41,7 +49,7 @@ static void get_mechanisms(DeviceContext *device_context) {
 static void get_device_info(DeviceContext *device_context) {
     int error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
     if (error_code != YERR_SUCCESS ) {
-        device_context->codes[(device_context->codes_len)++] = error_code;
+        update_error_code(device_context->codes, &(device_context->codes_len), MAX_CODE_LEN, error_code);
     }
 }
 
@@ -52,6 +60,16 @@ int open_devices(DeviceContext *device_list, int device_count) {
         device_context->index = i;
         open_device(device_context);
         get_mechanisms(device_context);
+        get_device_info(device_context);
+    }
+
+    return YERR_SUCCESS;
+}
+
+int refresh_device_contexts(DeviceContext *device_list, int device_count) {
+    int i;
+    for (i = 0; i < device_count; i++) {
+        DeviceContext *device_context = &(device_list[i]);
         get_device_info(device_context);
     }
 
