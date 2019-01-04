@@ -45,14 +45,14 @@ static void get_device_info(DeviceContext *device_context) {
     }
 }
 
-int open_devices(DeviceContext device_list[], int device_count) {
+int open_devices(DeviceContext *device_list, int device_count) {
     int i;
     for (i = 0; i < device_count; i++) {
-        DeviceContext device_context = device_list[i];
-        device_context.index = i;
-        open_device(&device_context);
-        get_mechanisms(&device_context);
-        get_device_info(&device_context);
+        DeviceContext *device_context = &(device_list[i]);
+        device_context->index = i;
+        open_device(device_context);
+        get_mechanisms(device_context);
+        get_device_info(device_context);
     }
 
     return YERR_SUCCESS;

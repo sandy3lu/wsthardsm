@@ -45,8 +45,10 @@ void print_context(char *buf, int buf_len, bool verbose) {
         int i;
         for (i = 0; i < g_crypto_context.device_count; i++) {
             DeviceContext *device_context = &(g_crypto_context.device_list[i]);
-            delta = print_device_context(device_context, cursor);
-            cursor += delta;
+            if (device_context->opened) {
+                delta = print_device_context(device_context, cursor);
+                cursor += delta;
+            }
         }
     }
 }
