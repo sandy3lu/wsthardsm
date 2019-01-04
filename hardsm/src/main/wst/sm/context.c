@@ -2,11 +2,12 @@
 #include <assert.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
-#include "../include/context.h"
 #include "../include/device.h"
+#include "../include/context.h"
 
 
 static CryptoContext g_crypto_context;
+static int init_statistics(CryptoContext *crypto_context);
 
 
 int init_context() {
@@ -17,7 +18,7 @@ int init_context() {
     error_code = init_statistics(&g_crypto_context);
     if (error_code != YERR_SUCCESS) return error_code;
 
-    error_code = open_devices(&g_crypto_context);
+    error_code = open_devices(g_crypto_context.device_list, g_crypto_context.device_count);
     if (error_code != YERR_SUCCESS) return error_code;
 
     return error_code;
@@ -26,7 +27,7 @@ int init_context() {
 int finalize_context() {
     int error_code = YERR_SUCCESS;
 
-    error_code = close_devices(&g_crypto_context);
+    error_code = close_devices(g_crypto_context.device_list, g_crypto_context.device_count);
 
     return error_code;
 }
@@ -48,4 +49,25 @@ void print_context(char *buf, int buf_len, bool verbose) {
             cursor += delta;
         }
     }
+}
+
+static int init_statistics(CryptoContext *crypto_context) {
+    int error_code = YERR_SUCCESS;
+
+    int device_count = 0;
+    error_code = SM_GetDeviceNum((PSM_UINT)&device_count);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    int device_type = 0;
+    const char *api_version = SM_GetAPIVersion();
+
+    error_code = SM_GetDeviceType((PSM_UINT)&device_type);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    strncpy(crypto_context->api_version, api_version,
+            sizeof(crypto_context->api_version));
+    crypto_context->device_type = device_type;
+    crypto_context->device_count = device_count;
+
+    return error_code;
 }

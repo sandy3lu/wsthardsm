@@ -5,8 +5,8 @@
 #include <sys/time.h>
 #include "../../include/sm_api.h"
 #include "../../include/util.h"
-#include "../../include/context.h"
 #include "../../include/device.h"
+#include "../../include/context.h"
 
 
 void test_device() {

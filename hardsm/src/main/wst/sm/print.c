@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
+#include "../include/device.h"
 #include "../include/context.h"
 
 
