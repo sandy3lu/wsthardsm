@@ -10,7 +10,8 @@
 
 void test_device() {
     init_context();
-    char buf[4] = {0};
+    char buf[1024 * 32] = {0};
     print_context(buf, sizeof(buf), true);
-    printf("%s", buf);
+    printf("%s\n", buf);
+    printf("len: %ld\n", strlen(buf));
 }

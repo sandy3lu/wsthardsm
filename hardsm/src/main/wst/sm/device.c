@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include <assert.h>
 #include "../include/sm_api.h"
-#include "../include/base64.h"
 #include "../include/util.h"
 #include "../include/device.h"
 
@@ -31,20 +31,33 @@ static int init_statistics(CryptoContext *crypto_context) {
 static void open_device(DeviceContext *device_context) {
     int error_code = SM_OpenDevice(device_context->index, false, &(device_context->h_device));
     if (error_code != YERR_SUCCESS) {
-        device_context->activated = false;
+        device_context->opened = false;
         device_context->codes[(device_context->codes_len)++] = error_code;
     } else {
-        device_context->activated = true;
+        device_context->opened = true;
     }
 }
 
 static void get_mechanisms(DeviceContext *device_context) {
-    if (! device_context->activated) return;
+    if (! device_context->opened) return;
 
-    int error_code = SM_GetMechanismList(device_context->h_device, (PSM_UINT)(device_context->mechanism_list),
-                                        (PSM_WORD)&(device_context->mechanisms_len));
+    int mechanism_list[MAX_MECHANISM_LEN] = {0};
+    int mechanisms_len = 0;
+    int error_code = SM_GetMechanismList(device_context->h_device, (PSM_UINT)mechanism_list, (PSM_WORD)&(mechanisms_len));
     if (error_code != YERR_SUCCESS) {
         device_context->codes[(device_context->codes_len)++] = error_code;
+        return;
+    }
+
+    device_context->mechanisms_len = mechanisms_len;
+
+    int i;
+    for (i = 0; i < mechanisms_len; i++) {
+        error_code = SM_GetMechanismInfo(device_context->h_device, mechanism_list[i],
+                                         &(device_context->mechanism_list[i]));
+        if (error_code != YERR_SUCCESS) {
+            device_context->codes[(device_context->codes_len)++] = error_code;
+        }
     }
 }
 
@@ -83,46 +96,21 @@ int init_context() {
     return error_code;
 }
 
-
 void print_context(char *buf, int buf_len, bool verbose) {
     int delta = 0;
     char *cursor = buf;
 
-    delta = snprintf(cursor, buf_len, "api version: %s\n", g_crypto_context.api_version);
-    printf("delta: %d\n", delta);
+    assert(buf_len >= 1024 * 32);
+
+    delta = print_statistics(&g_crypto_context, cursor);
     cursor += delta;
-    buf_len -= delta;
 
-    buf_len = 0;
-
-//    delta = snprintf(cursor, buf_len, "device type: %d\n", g_crypto_context.device_type);
-//    cursor += delta;
-//    buf_len -= delta;
-//
-//    delta = snprintf(cursor, buf_len, "device count: %d\n", g_crypto_context.device_count);
-//    cursor += delta;
-//    buf_len -= delta;
-//
-//    if (verbose) {
-//        int i;
-//        for (i = 0; i < g_crypto_context.device_count; i++) {
-//            DeviceContext *device_context = &(g_crypto_context.device_list[i]);
-//            delta = snprintf(cursor, buf_len, "--------------------------------\n");
-//            cursor += delta;
-//            buf_len -= delta;
-//
-//            delta = snprintf(cursor, buf_len, "device index: %d\n", device_context->index);
-//            cursor += delta;
-//            buf_len -= delta;
-//
-//            delta = snprintf(cursor, buf_len, "activated: %d\n", device_context->activated);
-//            cursor += delta;
-//            buf_len -= delta;
-//
-//            delta = snprintf(cursor, buf_len, "activated: %d\n", device_context->activated);
-//            cursor += delta;
-//            buf_len -= delta;
-//        }
-//        // @TODO: print verbose messages
-//    }
+    if (verbose) {
+        int i;
+        for (i = 0; i < g_crypto_context.device_count; i++) {
+            DeviceContext *device_context = &(g_crypto_context.device_list[i]);
+            delta = print_device_context(device_context, cursor);
+            cursor += delta;
+        }
+    }
 }
