@@ -79,6 +79,8 @@ char *get_error_string(int code);
 
 void print_error(int code);
 
+void update_error_code(int *codes, int *codes_len, int max_codes_len, int code);
+
 #ifdef __cplusplus
 }
 #endif

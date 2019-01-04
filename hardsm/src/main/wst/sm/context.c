@@ -53,6 +53,11 @@ void print_context(char *buf, int buf_len, bool verbose) {
     }
 }
 
+void self_check() {
+    // check device
+    open_devices(g_crypto_context.device_list, g_crypto_context.device_count);
+}
+
 static int init_statistics(CryptoContext *crypto_context) {
     int error_code = YERR_SUCCESS;
 

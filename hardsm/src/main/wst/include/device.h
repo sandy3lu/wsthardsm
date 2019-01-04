@@ -9,15 +9,15 @@ extern "C" {
 #define MAX_CODE_LEN        64
 
 typedef struct {
+    int index;
+    int opened;
+    int check_result;
+    int codes[MAX_CODE_LEN];
+    int codes_len;
     SM_MECHANISM_INFO mechanism_list[MAX_MECHANISM_LEN];
     int mechanisms_len;
     SM_DEVICE_INFO device_info;
     SM_DEVICE_HANDLE h_device;
-    int index;
-    int opened;
-    int log;
-    int codes[MAX_CODE_LEN];
-    int codes_len;
 } DeviceContext;
 
 

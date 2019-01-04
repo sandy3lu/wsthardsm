@@ -20,6 +20,8 @@ int init_context();
 
 int finalize_context();
 
+void self_check();
+
 void print_context(char *buf, int buf_len, bool verbose);
 
 int print_device_context(DeviceContext *device_context, char *buf);

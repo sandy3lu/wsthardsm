@@ -147,3 +147,11 @@ void print_log(int level, const char* filename, const char* func_name, int line,
     va_end(ap);
     fflush(stderr);
 }
+
+
+void update_error_code(int *codes, int *codes_len, int max_codes_len, int code) {
+    if (*codes_len >= max_codes_len) {
+        *codes_len = 0;
+    }
+    codes[(*codes_len)++] = code;
+}

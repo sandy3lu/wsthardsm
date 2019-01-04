@@ -7,6 +7,7 @@
 #include "../../include/util.h"
 #include "../../include/device.h"
 #include "../../include/context.h"
+#include "../../include/selfcheck.h"
 
 
 void test_device() {
@@ -14,6 +15,8 @@ void test_device() {
 
     error_code = init_context();
     if (error_code != YERR_SUCCESS) print_error(error_code);
+
+    self_check();
 
     char buf[1024 * 32] = {0};
     print_context(buf, sizeof(buf), true);

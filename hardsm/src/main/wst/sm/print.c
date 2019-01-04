@@ -241,7 +241,7 @@ static int print_device_status(int status, char *buf) {
     delta = sprintf(cursor, "device status:");
     cursor += delta;
 
-    if (0x00000000 & status) {
+    if (0x00000000 == status) {
         delta = sprintf(cursor, " F_PY_CHUCHANG");
         cursor += delta;
     }
@@ -279,6 +279,40 @@ static int print_device_info(PSM_DEVICE_INFO device_info, char *buf) {
     return cursor - buf;
 }
 
+static int print_testdevice_result(int result, char *buf) {
+    int delta = 0;
+    char *cursor = buf;
+
+    delta = sprintf(cursor, "device test result: ");
+    cursor += delta;
+LOG_DEBUG("%d", result);
+    if (0x00000000 == result) {
+        delta = sprintf(cursor, " ok");
+        cursor += delta;
+    }
+    if (0x00000001 & result) {
+        delta = sprintf(cursor, " digital physical noise generator error");
+        cursor += delta;
+    }
+    if (0x00000002 & result) {
+        delta = sprintf(cursor, " SDRAM error");
+        cursor += delta;
+    }
+    if (0x00000004 & result) {
+        delta = sprintf(cursor, " SSX30E error");
+        cursor += delta;
+    }
+    if (0x00000008 & result) {
+        delta = sprintf(cursor, " FPGA error");
+        cursor += delta;
+    }
+
+    delta = sprintf(cursor, "\n");
+    cursor += delta;
+
+    return cursor - buf;
+}
+
 int print_device_context(DeviceContext *device_context, char *buf) {
     int delta = 0;
     char *cursor = buf;
@@ -290,6 +324,9 @@ int print_device_context(DeviceContext *device_context, char *buf) {
     cursor += delta;
 
     delta = sprintf(cursor, "opened: %d\n", device_context->opened);
+    cursor += delta;
+
+    delta = print_testdevice_result(device_context->check_result, cursor);
     cursor += delta;
 
     delta = sprintf(cursor, "mechanisms:\n");

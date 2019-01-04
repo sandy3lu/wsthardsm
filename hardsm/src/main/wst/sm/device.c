@@ -5,14 +5,6 @@
 #include "../include/device.h"
 
 
-static void update_error_code(int *codes, int *codes_len, int max_codes_len, int code) {
-    if (*codes_len >= max_codes_len) {
-        *codes_len = 0;
-    }
-    codes[(*codes_len)++] = code;
-}
-
-
 static void open_device(DeviceContext *device_context) {
     int error_code = SM_OpenDevice(device_context->index, false, &(device_context->h_device));
     if (error_code != YERR_SUCCESS) {
@@ -28,7 +20,8 @@ static void get_mechanisms(DeviceContext *device_context) {
 
     int mechanism_list[MAX_MECHANISM_LEN] = {0};
     int mechanisms_len = 0;
-    int error_code = SM_GetMechanismList(device_context->h_device, (PSM_UINT)mechanism_list, (PSM_WORD)&(mechanisms_len));
+    int error_code = SM_GetMechanismList(device_context->h_device, (PSM_UINT)mechanism_list,
+                                         (PSM_WORD)&(mechanisms_len));
     if (error_code != YERR_SUCCESS) {
         update_error_code(device_context->codes, &(device_context->codes_len), MAX_CODE_LEN, error_code);
         return;
