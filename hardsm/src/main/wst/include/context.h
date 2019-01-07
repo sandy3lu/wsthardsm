@@ -20,6 +20,8 @@ int ctx_open_device(int index);
 
 int ctx_close_device(int index);
 
+int ctx_close_all_devices();
+
 int ctx_get_device_status(int index, DeviceStatus *device_status);
 
 DeviceStatuses ctx_get_device_statuses();
@@ -27,6 +29,8 @@ DeviceStatuses ctx_get_device_statuses();
 int ctx_check_device(int index);
 
 int init_statistics();
+
+int ctx_device_count();
 
 
 void ctx_print_context(char *buf, int buf_len, bool verbose);

@@ -286,7 +286,7 @@ static int _print_testdevice_result(int result, char *buf) {
 
     delta = sprintf(cursor, "device test result: ");
     cursor += delta;
-LOG_DEBUG("%d", result);
+
     if (0x00000000 == result) {
         delta = sprintf(cursor, " ok");
         cursor += delta;

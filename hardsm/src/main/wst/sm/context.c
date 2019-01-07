@@ -49,12 +49,17 @@ int ctx_close_device(int index) {
         return INDEX_OUTOF_BOUND;
     }
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
-    // if has opened, then just do nothing
-    if (device_context->opened) {
-        return YERR_SUCCESS;
+    return dev_close_device(device_context);
+}
+
+int ctx_close_all_devices() {
+    int i;
+    for (i = 0; i < g_crypto_context.device_count; i++) {
+        int error_code = ctx_close_device(i);
+        if (error_code != YERR_SUCCESS) return error_code;
     }
 
-    return dev_close_device(device_context);
+    return YERR_SUCCESS;
 }
 
 int ctx_get_device_status(int index, DeviceStatus *device_status) {
@@ -68,7 +73,7 @@ int ctx_get_device_status(int index, DeviceStatus *device_status) {
     device_status->opened = device_context->opened;
     device_status->check_result = device_context->check_result;
 
-    return device_status;
+    return YERR_SUCCESS;
 }
 
 DeviceStatuses ctx_get_device_statuses() {
@@ -82,6 +87,10 @@ DeviceStatuses ctx_get_device_statuses() {
     device_statuses.count = g_crypto_context.device_count;
 
     return device_statuses;
+}
+
+int ctx_device_count() {
+    return g_crypto_context.device_count;
 }
 
 int ctx_check_device(int index) {

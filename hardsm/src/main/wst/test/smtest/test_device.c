@@ -16,8 +16,14 @@ void test_device() {
     error_code = init_statistics();
     if (error_code != YERR_SUCCESS) print_error(error_code);
 
+    int device_count = ctx_device_count();
+    printf("device count: %d\n", device_count);
 
-
+    int i;
+    for (i = 0; i < device_count; i++) {
+        error_code = ctx_open_device(i);
+        if (error_code != YERR_SUCCESS) print_error(error_code);
+    }
 
     char buf1[1024 * 32] = {0};
     DeviceStatuses device_statuses = ctx_get_device_statuses();
@@ -25,7 +31,12 @@ void test_device() {
     print_device_statuses(&device_statuses, buf1);
     printf("%s\n", buf1);
 
+    error_code = ctx_close_all_devices();
+    if (error_code != YERR_SUCCESS) print_error(error_code);
+
     char buf2[1024 * 32] = {0};
-    ctx_print_context(buf2, sizeof(buf2), true);
+    device_statuses = ctx_get_device_statuses();
+    printf("len: %d\n", device_statuses.count);
+    print_device_statuses(&device_statuses, buf2);
     printf("%s\n", buf2);
 }
