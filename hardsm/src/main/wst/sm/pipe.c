@@ -103,7 +103,7 @@ int pp_logout(DeviceContext *device_context) {
     if (NULL == device_context->h_device) {
         return DEVICE_NOT_OPENED;
     }
-    if (NULL == device_context->h_pipes) {
+    if (device_context->pipes_len <= 0) {
         return PIPE_NOT_OPENED;
     }
     SM_PIPE_HANDLE pipe = get_opened_pipe(device_context);

@@ -19,6 +19,8 @@ void init_error_string() {
     MSGS[DEVICE_NOT_OPENED] = "device not opened";
     MSGS[PIPE_NOT_OPENED] = "pipe not opened";
     MSGS[PIPE_RESOURCE_EXCEEDED] = "pipe resource exceeded";
+    MSGS[BUFSIZE_TOO_SMALL] = "buf size too small";
+    MSGS[NEED_LOGIN] = "need login";
 }
 
 char *get_error_string(int code) {

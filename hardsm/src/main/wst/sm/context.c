@@ -1,14 +1,19 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
 #include "../include/data.h"
 #include "../include/device.h"
 #include "../include/context.h"
+#include "../include/crypto.h"
 #include "../include/pipe.h"
 
 
 static CryptoContext g_crypto_context;
+static int init_statistics();
+static int check_device_index(int index);
+static int check_pipe_index(int device_index, int pipe_index);
 
 
 void ctx_print_context(char *buf, int buf_len, bool verbose) {
@@ -103,28 +108,16 @@ int ctx_check_device(int index) {
     return dev_check_device(device_context);
 }
 
-int init_statistics() {
+int init() {
     int error_code = YERR_SUCCESS;
-    CryptoContext *crypto_context = &(g_crypto_context);
-
-    int device_count = 0;
-    error_code = SM_GetDeviceNum((PSM_UINT)&device_count);
+    error_code = crypto_init_context();
     if (error_code != YERR_SUCCESS) return error_code;
 
-    int device_type = 0;
-    const char *api_version = SM_GetAPIVersion();
-
-    error_code = SM_GetDeviceType((PSM_UINT)&device_type);
+    error_code = init_statistics();
     if (error_code != YERR_SUCCESS) return error_code;
-
-    strncpy(crypto_context->api_version, api_version,
-            sizeof(crypto_context->api_version));
-    crypto_context->device_type = device_type;
-    crypto_context->device_count = device_count;
 
     return error_code;
 }
-
 
 int ctx_open_pipe(int index) {
     if (index < 0 || index >= g_crypto_context.device_count) {
@@ -175,4 +168,67 @@ int ctx_logout(int index) {
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return pp_logout(device_context);
+}
+
+int ctx_digest(int device_index, int pipe_index, const char *data, int data_len, char *out, int out_len) {
+    int error_code = YERR_SUCCESS;
+
+    error_code = check_pipe_index(device_index, pipe_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = abs(pipe_index);
+    pipe_index %= device_context->pipes_len;
+
+    SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
+    return crypto_digest(h_pipe, data, data_len, out, out_len);
+}
+
+static int init_statistics() {
+    int error_code = YERR_SUCCESS;
+    CryptoContext *crypto_context = &(g_crypto_context);
+
+    int device_count = 0;
+    error_code = SM_GetDeviceNum((PSM_UINT)&device_count);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    int device_type = 0;
+    const char *api_version = SM_GetAPIVersion();
+
+    error_code = SM_GetDeviceType((PSM_UINT)&device_type);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    strncpy(crypto_context->api_version, api_version,
+            sizeof(crypto_context->api_version));
+    crypto_context->device_type = device_type;
+    crypto_context->device_count = device_count;
+
+    return error_code;
+}
+
+static int check_device_index(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+    return YERR_SUCCESS;
+}
+
+static int check_pipe_index(int device_index, int pipe_index) {
+    int error_code = YERR_SUCCESS;
+
+    error_code = check_device_index(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    if (NULL == device_context->h_device) {
+        return DEVICE_NOT_OPENED;
+    }
+    if (device_context->pipes_len <= 0) {
+        return PIPE_NOT_OPENED;
+    }
+    if (!device_context->logged_in) {
+        return NEED_LOGIN;
+    }
+
+    return error_code;
 }

@@ -28,7 +28,7 @@ DeviceStatuses ctx_get_device_statuses();
 
 int ctx_check_device(int index);
 
-int init_statistics();
+int init();
 
 int ctx_device_count();
 
@@ -42,6 +42,7 @@ int ctx_login(int index, const char *pin_code);
 
 int ctx_logout(int index);
 
+int ctx_digest(int device_index, int pipe_index, const char *data, int data_len, char *out, int out_len);
 
 void ctx_print_context(char *buf, int buf_len, bool verbose);
 
