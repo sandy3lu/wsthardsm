@@ -5,7 +5,7 @@
 #include "../include/data.h"
 #include "../include/device.h"
 #include "../include/context.h"
-#include "../include/check.h"
+#include "../include/pipe.h"
 
 
 static CryptoContext g_crypto_context;
@@ -70,10 +70,11 @@ int ctx_get_device_status(int index, DeviceStatus *device_status) {
     memset(device_status, 0, sizeof(DeviceStatus));
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     device_status->index = index;
+    device_status->logged_in = device_context->logged_in;
     device_status->opened = NULL != device_context->h_device;
     device_status->check_result = device_context->check_result;
 
-    return YERR_SUCCESS;
+    return dev_pipes_count(device_context, &(device_status->max_pipes_count), &(device_status->free_pipes_count));
 }
 
 DeviceStatuses ctx_get_device_statuses() {
@@ -122,4 +123,56 @@ int init_statistics() {
     crypto_context->device_count = device_count;
 
     return error_code;
+}
+
+
+int ctx_open_pipe(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    int max_pipes_count = 0;
+    int free_pipes_count = 0;
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    int error_code = dev_pipes_count(device_context, &max_pipes_count, &free_pipes_count);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    error_code = pp_open_pipe(device_context, free_pipes_count);
+    return error_code;
+}
+
+int ctx_close_pipe(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    return pp_close_all_pipe(device_context);
+}
+
+int ctx_close_all_pipe(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    return pp_close_all_pipe(device_context);
+}
+
+int ctx_login(int index, const char *pin_code) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    return pp_login(device_context, pin_code);
+}
+
+int ctx_logout(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    return pp_logout(device_context);
 }

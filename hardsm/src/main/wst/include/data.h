@@ -12,6 +12,9 @@ typedef struct {
     int index;
     bool opened;
     int check_result;
+    int logged_in;
+    int max_pipes_count;
+    int free_pipes_count;
 } DeviceStatus;
 
 typedef struct {

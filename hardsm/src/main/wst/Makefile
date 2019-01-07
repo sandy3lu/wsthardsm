@@ -34,7 +34,7 @@ MKDIR_CMD = mkdir -p $@
 CC_CMD = $(CC) -c -Wall -fPIC -DMOCK_MODE=$(mock_mode) -o $@ $<
 
 
-all: $(YJSMWST_LIB) demo
+all: clean $(YJSMWST_LIB) demo
 
 # --- build libyjsmwst.so ---
 $(YJSMWST_LIB) : $(SM_OBJ) $(PROTO_OBJ) $(UTIL_OBJ) | $(TARGET_DIR)

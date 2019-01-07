@@ -383,10 +383,19 @@ int print_device_status(DeviceStatus *device_status, char *buf) {
     delta = sprintf(cursor, "index: %d\n", device_status->index);
     cursor += delta;
 
-    delta = sprintf(cursor, "opened: %d\n", NULL != device_status->opened);
+    delta = sprintf(cursor, "opened: %d\n", device_status->opened);
+    cursor += delta;
+
+    delta = sprintf(cursor, "logged in: %d\n", device_status->logged_in);
     cursor += delta;
 
     delta = sprintf(cursor, "check result: %d\n", device_status->check_result);
+    cursor += delta;
+
+    delta = sprintf(cursor, "max pipes count: %d\n", device_status->max_pipes_count);
+    cursor += delta;
+
+    delta = sprintf(cursor, "free pipes count: %d\n", device_status->free_pipes_count);
     cursor += delta;
 
     return cursor - buf;

@@ -32,6 +32,16 @@ int init_statistics();
 
 int ctx_device_count();
 
+int ctx_open_pipe(int index);
+
+int ctx_close_pipe(int index);
+
+int ctx_close_all_pipe(int index);
+
+int ctx_login(int index, const char *pin_code);
+
+int ctx_logout(int index);
+
 
 void ctx_print_context(char *buf, int buf_len, bool verbose);
 

@@ -15,8 +15,11 @@ void init_error_string() {
     MSGS[YERR_SUCCESS] = "success";
     MSGS[YERR_FORMAT_ERROR] = "data format error";
     MSGS[NO_DEVICE_ERROR] = "no device error";
+    MSGS[INDEX_OUTOF_BOUND] = "index out of bound";
+    MSGS[DEVICE_NOT_OPENED] = "device not opened";
+    MSGS[PIPE_NOT_OPENED] = "pipe not opened";
+    MSGS[PIPE_RESOURCE_EXCEEDED] = "pipe resource exceeded";
 }
-
 
 char *get_error_string(int code) {
     if (code > 0 && code < 300) {

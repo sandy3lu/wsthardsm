@@ -30,6 +30,8 @@ typedef int bool;
 #define DEVICE_CLOSE_ERROR          602
 #define INDEX_OUTOF_BOUND           603
 #define DEVICE_NOT_OPENED           604
+#define PIPE_NOT_OPENED             605
+#define PIPE_RESOURCE_EXCEEDED      606
 
 
 enum LOG_LEVEL {

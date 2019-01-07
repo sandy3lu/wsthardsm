@@ -88,3 +88,16 @@ int dev_check_device(DeviceContext *device_context) {
     int error_code = SM_TestDevice(device_context->h_device, (PSM_UINT)&(device_context->check_result));
     return error_code;
 }
+
+int dev_pipes_count(DeviceContext *device_context, int *max_pipes_count, int *free_pipes_count) {
+    if (NULL == device_context->h_device) {
+        return DEVICE_NOT_OPENED;
+    }
+    // refresh device info
+    int error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    *max_pipes_count = device_context->device_info.stDevResourceInfo.wMaxPipeCount;
+    *free_pipes_count = device_context->device_info.stDevResourceInfo.wFreePipeCount;
+    return YERR_SUCCESS;
+}
