@@ -2,17 +2,20 @@
 #include <assert.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
+#include "../include/data.h"
 #include "../include/device.h"
 
 
-static void open_device(DeviceContext *device_context) {
+static int open_device(DeviceContext *device_context) {
     int error_code = SM_OpenDevice(device_context->index, false, &(device_context->h_device));
     if (error_code != YERR_SUCCESS) {
         device_context->opened = false;
-        device_context->codes[(device_context->codes_len)++] = error_code;
+        return error_code;
     } else {
         device_context->opened = true;
     }
+
+    return YERR_SUCCESS;
 }
 
 static void get_mechanisms(DeviceContext *device_context) {
@@ -40,52 +43,56 @@ static void get_mechanisms(DeviceContext *device_context) {
 }
 
 static void get_device_info(DeviceContext *device_context) {
+    if (!device_context->opened) return;
+
     int error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
     if (error_code != YERR_SUCCESS ) {
         update_error_code(device_context->codes, &(device_context->codes_len), MAX_CODE_LEN, error_code);
     }
 }
 
-int open_devices(DeviceContext *device_list, int device_count) {
-    int i;
-    for (i = 0; i < device_count; i++) {
-        DeviceContext *device_context = &(device_list[i]);
-        device_context->index = i;
-        open_device(device_context);
-        get_mechanisms(device_context);
-        get_device_info(device_context);
-    }
-
-    return YERR_SUCCESS;
-}
-
-int refresh_device_contexts(DeviceContext *device_list, int device_count) {
-    int i;
-    for (i = 0; i < device_count; i++) {
-        DeviceContext *device_context = &(device_list[i]);
-        get_device_info(device_context);
-    }
-
-    return YERR_SUCCESS;
-}
-
-int close_devices(DeviceContext device_list[], int device_count) {
-    int error_code = YERR_SUCCESS;
-
-    int i;
-    for (i = 0; i < device_count; i++) {
-        DeviceContext device_context = device_list[i];
-        if (device_context.opened && NULL != device_context.h_device) {
-            int ret = SM_CloseDevice(device_context.h_device);
-            if (ret != YERR_SUCCESS) {
-                device_context.codes[(device_context.codes_len)++] = ret;
-                error_code = DEVICE_CLOSE_ERROR;
-            } else {
-                device_context.opened = false;
-                device_context.h_device = NULL;
-            }
+int dev_init_device(DeviceContext *device_context) {
+    if (!device_context->opened) {
+        int error_code = open_device(device_context);
+        if (error_code != YERR_SUCCESS) {
+            return error_code;
         }
     }
 
+    get_mechanisms(device_context);
+    get_device_info(device_context);
+
+    return YERR_SUCCESS;
+}
+
+void dev_refresh_device_contexts(DeviceContext *device_list, int device_count) {
+    int i;
+    for (i = 0; i < device_count; i++) {
+        DeviceContext *device_context = &(device_list[i]);
+        get_mechanisms(device_context);
+        get_device_info(device_context);
+    }
+}
+
+int dev_close_device(DeviceContext *device_context) {
+    if (device_context->opened) {
+        int error_code = SM_CloseDevice(device_context->h_device);
+        if (error_code != YERR_SUCCESS) {
+            return error_code;
+        } else {
+            device_context->opened = false;
+            device_context->h_device = NULL;
+        }
+    }
+
+    return YERR_SUCCESS;
+}
+
+int dev_check_device(DeviceContext *device_context) {
+    if (!device_context->opened) {
+        return DEVICE_NOT_OPENED;
+    }
+
+    int error_code = SM_TestDevice(device_context->h_device, (PSM_UINT)&(device_context->check_result));
     return error_code;
 }

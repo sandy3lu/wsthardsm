@@ -28,6 +28,8 @@ typedef int bool;
 #define YERR_FORMAT_ERROR           501
 #define NO_DEVICE_ERROR             601
 #define DEVICE_CLOSE_ERROR          602
+#define INDEX_OUTOF_BOUND           603
+#define DEVICE_NOT_OPENED           604
 
 
 enum LOG_LEVEL {

@@ -16,17 +16,29 @@ typedef struct {
 } CryptoContext;
 
 
-int init_context();
+int ctx_open_device(int index);
 
-int finalize_context();
+int ctx_close_device(int index);
 
-void self_check();
+int ctx_get_device_status(int index, DeviceStatus *device_status);
 
-void print_context(char *buf, int buf_len, bool verbose);
+DeviceStatuses ctx_get_device_statuses();
+
+int ctx_check_device(int index);
+
+int init_statistics();
+
+
+void ctx_print_context(char *buf, int buf_len, bool verbose);
 
 int print_device_context(DeviceContext *device_context, char *buf);
 
 int print_statistics(CryptoContext *crypto_context, char *buf);
+
+int print_device_status(DeviceStatus *device_status, char *buf);
+
+int print_device_statuses(DeviceStatuses *device_statuses, char *buf);
+
 
 #ifdef __cplusplus
 }

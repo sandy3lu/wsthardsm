@@ -2,37 +2,16 @@
 #include <assert.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
+#include "../include/data.h"
 #include "../include/device.h"
 #include "../include/context.h"
+#include "../include/check.h"
 
 
 static CryptoContext g_crypto_context;
-static int init_statistics(CryptoContext *crypto_context);
 
 
-int init_context() {
-    int error_code = YERR_SUCCESS;
-
-    memset(&g_crypto_context, 0, sizeof(g_crypto_context));
-
-    error_code = init_statistics(&g_crypto_context);
-    if (error_code != YERR_SUCCESS) return error_code;
-
-    error_code = open_devices(g_crypto_context.device_list, g_crypto_context.device_count);
-    if (error_code != YERR_SUCCESS) return error_code;
-
-    return error_code;
-}
-
-int finalize_context() {
-    int error_code = YERR_SUCCESS;
-
-    error_code = close_devices(g_crypto_context.device_list, g_crypto_context.device_count);
-
-    return error_code;
-}
-
-void print_context(char *buf, int buf_len, bool verbose) {
+void ctx_print_context(char *buf, int buf_len, bool verbose) {
     int delta = 0;
     char *cursor = buf;
 
@@ -53,13 +32,70 @@ void print_context(char *buf, int buf_len, bool verbose) {
     }
 }
 
-void self_check() {
-    // check device
-    open_devices(g_crypto_context.device_list, g_crypto_context.device_count);
+int ctx_open_device(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    device_context->index = index;
+    int error_code = dev_init_device(device_context);
+
+    return error_code;
 }
 
-static int init_statistics(CryptoContext *crypto_context) {
+int ctx_close_device(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    // if has opened, then just do nothing
+    if (device_context->opened) {
+        return YERR_SUCCESS;
+    }
+
+    return dev_close_device(device_context);
+}
+
+int ctx_get_device_status(int index, DeviceStatus *device_status) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    memset(device_status, 0, sizeof(DeviceStatus));
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    device_status->index = index;
+    device_status->opened = device_context->opened;
+    device_status->check_result = device_context->check_result;
+
+    return device_status;
+}
+
+DeviceStatuses ctx_get_device_statuses() {
+    DeviceStatuses device_statuses;
+    memset(&device_statuses, 0, sizeof(device_statuses));
+
+    int i;
+    for (i = 0; i < g_crypto_context.device_count; i++) {
+        ctx_get_device_status(i, &device_statuses.device_status_list[i]);
+    }
+    device_statuses.count = g_crypto_context.device_count;
+
+    return device_statuses;
+}
+
+int ctx_check_device(int index) {
+    if (index < 0 || index >= g_crypto_context.device_count) {
+        return INDEX_OUTOF_BOUND;
+    }
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    return dev_check_device(device_context);
+}
+
+int init_statistics() {
     int error_code = YERR_SUCCESS;
+    CryptoContext *crypto_context = &(g_crypto_context);
 
     int device_count = 0;
     error_code = SM_GetDeviceNum((PSM_UINT)&device_count);

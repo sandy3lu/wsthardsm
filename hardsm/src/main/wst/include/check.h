@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-void check_devices(DeviceContext *device_list, int device_count);
 
 #ifdef __cplusplus
 }

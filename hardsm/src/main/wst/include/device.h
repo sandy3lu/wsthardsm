@@ -9,8 +9,8 @@ extern "C" {
 #define MAX_CODE_LEN        64
 
 typedef struct {
-    int index;
     int opened;
+    int index;
     int check_result;
     int codes[MAX_CODE_LEN];
     int codes_len;
@@ -21,11 +21,13 @@ typedef struct {
 } DeviceContext;
 
 
-int open_devices(DeviceContext *device_list, int device_count);
+int dev_init_device(DeviceContext *device_context);
 
-int close_devices(DeviceContext *device_list, int device_count);
+int dev_close_device(DeviceContext *device_context);
 
-int refresh_device_contexts(DeviceContext *device_list, int device_count);
+void dev_refresh_device_contexts(DeviceContext *device_list, int device_count);
+
+int dev_check_device(DeviceContext *device_context);
 
 #ifdef __cplusplus
 }

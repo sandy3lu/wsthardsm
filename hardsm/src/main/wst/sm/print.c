@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
+#include "../include/data.h"
 #include "../include/device.h"
 #include "../include/context.h"
 
 
-static int print_capabilities(int flag, char *buf) {
+static int _print_capabilities(int flag, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
@@ -45,7 +46,7 @@ static int print_capabilities(int flag, char *buf) {
 }
 
 
-static int print_mechanism(PSM_MECHANISM_INFO mechanism, char *buf) {
+static int _print_mechanism(PSM_MECHANISM_INFO mechanism, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
@@ -64,13 +65,13 @@ static int print_mechanism(PSM_MECHANISM_INFO mechanism, char *buf) {
     delta = sprintf(cursor, "support algorithms: ");
     cursor += delta;
 
-    delta = print_capabilities(mechanism->uiFlags, cursor);
+    delta = _print_capabilities(mechanism->uiFlags, cursor);
     cursor += delta;
 
     return cursor - buf;
 }
 
-static int print_resource_info(SM_RESOURCE_INFO *resource_info, char *buf) {
+static int _print_resource_info(SM_RESOURCE_INFO *resource_info, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
@@ -140,7 +141,7 @@ static int print_resource_info(SM_RESOURCE_INFO *resource_info, char *buf) {
     return cursor - buf;
 }
 
-static int print_manufacture_info(SM_MANUFCT_INFO *manufacture_info, char *buf) {
+static int _print_manufacture_info(SM_MANUFCT_INFO *manufacture_info, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
@@ -168,7 +169,7 @@ static int print_manufacture_info(SM_MANUFCT_INFO *manufacture_info, char *buf) 
     return cursor - buf;
 }
 
-static int print_device_flags(int flag, char *buf) {
+static int _print_device_flags(int flag, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
@@ -234,7 +235,7 @@ static int print_device_flags(int flag, char *buf) {
     return cursor - buf;
 }
 
-static int print_device_status(int status, char *buf) {
+static int _print_device_status(int status, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
@@ -260,26 +261,26 @@ static int print_device_status(int status, char *buf) {
     return cursor - buf;
 }
 
-static int print_device_info(PSM_DEVICE_INFO device_info, char *buf) {
+static int _print_device_info(PSM_DEVICE_INFO device_info, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
-    delta = print_resource_info(&(device_info->stDevResourceInfo), cursor);
+    delta = _print_resource_info(&(device_info->stDevResourceInfo), cursor);
     cursor += delta;
 
-    delta = print_manufacture_info(&(device_info->stManufactureInfo), cursor);
+    delta = _print_manufacture_info(&(device_info->stManufactureInfo), cursor);
     cursor += delta;
 
-    delta = print_device_flags(device_info->uiFlags, cursor);
+    delta = _print_device_flags(device_info->uiFlags, cursor);
     cursor += delta;
 
-    delta = print_device_status(device_info->uiStatus, cursor);
+    delta = _print_device_status(device_info->uiStatus, cursor);
     cursor += delta;
 
     return cursor - buf;
 }
 
-static int print_testdevice_result(int result, char *buf) {
+static int _print_testdevice_result(int result, char *buf) {
     int delta = 0;
     char *cursor = buf;
 
@@ -326,7 +327,7 @@ int print_device_context(DeviceContext *device_context, char *buf) {
     delta = sprintf(cursor, "opened: %d\n", device_context->opened);
     cursor += delta;
 
-    delta = print_testdevice_result(device_context->check_result, cursor);
+    delta = _print_testdevice_result(device_context->check_result, cursor);
     cursor += delta;
 
     delta = sprintf(cursor, "mechanisms:\n");
@@ -334,7 +335,7 @@ int print_device_context(DeviceContext *device_context, char *buf) {
 
     int j;
     for (j = 0; j < device_context->mechanisms_len; j++) {
-        delta = print_mechanism(&(device_context->mechanism_list[j]), cursor);
+        delta = _print_mechanism(&(device_context->mechanism_list[j]), cursor);
         cursor += delta;
     }
 
@@ -344,7 +345,7 @@ int print_device_context(DeviceContext *device_context, char *buf) {
     delta = sprintf(cursor, "device info:\n");
     cursor += delta;
 
-    delta = print_device_info(&(device_context->device_info), cursor);
+    delta = _print_device_info(&(device_context->device_info), cursor);
     cursor += delta;
 
     delta = sprintf(cursor, "errors:\n");
@@ -371,6 +372,35 @@ int print_statistics(CryptoContext *crypto_context, char *buf) {
 
     delta = sprintf(cursor, "device count: %d\n", crypto_context->device_count);
     cursor += delta;
+
+    return cursor - buf;
+}
+
+int print_device_status(DeviceStatus *device_status, char *buf) {
+    int delta = 0;
+    char *cursor = buf;
+
+    delta = sprintf(cursor, "index: %d\n", device_status->index);
+    cursor += delta;
+
+    delta = sprintf(cursor, "opened: %d\n", device_status->opened);
+    cursor += delta;
+
+    delta = sprintf(cursor, "check result: %d\n", device_status->check_result);
+    cursor += delta;
+
+    return cursor - buf;
+}
+
+int print_device_statuses(DeviceStatuses *device_statuses, char *buf) {
+    int delta = 0;
+    char *cursor = buf;
+
+    int i;
+    for (i = 0; i < device_statuses->count; i++) {
+        delta = print_device_status(&(device_statuses->device_status_list[i]), cursor);
+        cursor += delta;
+    }
 
     return cursor - buf;
 }
