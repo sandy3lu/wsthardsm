@@ -24,7 +24,7 @@ void ctx_print_context(char *buf, int buf_len, bool verbose) {
         int i;
         for (i = 0; i < g_crypto_context.device_count; i++) {
             DeviceContext *device_context = &(g_crypto_context.device_list[i]);
-            if (device_context->opened) {
+            if (NULL != device_context->h_device) {
                 delta = print_device_context(device_context, cursor);
                 cursor += delta;
             }
@@ -70,7 +70,7 @@ int ctx_get_device_status(int index, DeviceStatus *device_status) {
     memset(device_status, 0, sizeof(DeviceStatus));
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     device_status->index = index;
-    device_status->opened = device_context->opened;
+    device_status->opened = NULL != device_context->h_device;
     device_status->check_result = device_context->check_result;
 
     return YERR_SUCCESS;

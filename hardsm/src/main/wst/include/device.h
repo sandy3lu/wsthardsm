@@ -5,11 +5,11 @@
 extern "C" {
 #endif
 
+
 #define MAX_MECHANISM_LEN   32
 #define MAX_CODE_LEN        64
 
 typedef struct {
-    int opened;
     int index;
     int check_result;
     int codes[MAX_CODE_LEN];
@@ -18,6 +18,7 @@ typedef struct {
     int mechanisms_len;
     SM_DEVICE_INFO device_info;
     SM_DEVICE_HANDLE h_device;
+    SM_PIPE_HANDLE h_pipe;
 } DeviceContext;
 
 
@@ -28,6 +29,7 @@ int dev_close_device(DeviceContext *device_context);
 void dev_refresh_device_contexts(DeviceContext *device_list, int device_count);
 
 int dev_check_device(DeviceContext *device_context);
+
 
 #ifdef __cplusplus
 }

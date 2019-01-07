@@ -7,19 +7,12 @@
 
 
 static int open_device(DeviceContext *device_context) {
-    int error_code = SM_OpenDevice(device_context->index, false, &(device_context->h_device));
-    if (error_code != YERR_SUCCESS) {
-        device_context->opened = false;
-        return error_code;
-    } else {
-        device_context->opened = true;
-    }
+    return SM_OpenDevice(device_context->index, false, &(device_context->h_device));
 
-    return YERR_SUCCESS;
 }
 
 static void get_mechanisms(DeviceContext *device_context) {
-    if (! device_context->opened) return;
+    if (NULL == device_context->h_device) return;
 
     int mechanism_list[MAX_MECHANISM_LEN] = {0};
     int mechanisms_len = 0;
@@ -43,7 +36,7 @@ static void get_mechanisms(DeviceContext *device_context) {
 }
 
 static void get_device_info(DeviceContext *device_context) {
-    if (!device_context->opened) return;
+    if (NULL == device_context->h_device) return;
 
     int error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
     if (error_code != YERR_SUCCESS ) {
@@ -52,7 +45,7 @@ static void get_device_info(DeviceContext *device_context) {
 }
 
 int dev_init_device(DeviceContext *device_context) {
-    if (!device_context->opened) {
+    if (NULL == device_context->h_device) {
         int error_code = open_device(device_context);
         if (error_code != YERR_SUCCESS) {
             return error_code;
@@ -75,12 +68,11 @@ void dev_refresh_device_contexts(DeviceContext *device_list, int device_count) {
 }
 
 int dev_close_device(DeviceContext *device_context) {
-    if (device_context->opened) {
+    if (NULL != device_context->h_device) {
         int error_code = SM_CloseDevice(device_context->h_device);
         if (error_code != YERR_SUCCESS) {
             return error_code;
         } else {
-            device_context->opened = false;
             device_context->h_device = NULL;
         }
     }
@@ -89,7 +81,7 @@ int dev_close_device(DeviceContext *device_context) {
 }
 
 int dev_check_device(DeviceContext *device_context) {
-    if (!device_context->opened) {
+    if (NULL == device_context->h_device) {
         return DEVICE_NOT_OPENED;
     }
 

@@ -324,7 +324,7 @@ int print_device_context(DeviceContext *device_context, char *buf) {
     delta = sprintf(cursor, "device index: %d\n", device_context->index);
     cursor += delta;
 
-    delta = sprintf(cursor, "opened: %d\n", device_context->opened);
+    delta = sprintf(cursor, "opened: %d\n", NULL != device_context->h_device);
     cursor += delta;
 
     delta = _print_testdevice_result(device_context->check_result, cursor);
@@ -383,7 +383,7 @@ int print_device_status(DeviceStatus *device_status, char *buf) {
     delta = sprintf(cursor, "index: %d\n", device_status->index);
     cursor += delta;
 
-    delta = sprintf(cursor, "opened: %d\n", device_status->opened);
+    delta = sprintf(cursor, "opened: %d\n", NULL != device_status->opened);
     cursor += delta;
 
     delta = sprintf(cursor, "check result: %d\n", device_status->check_result);
