@@ -392,10 +392,16 @@ int print_device_status(DeviceStatus *device_status, char *buf) {
     delta = sprintf(cursor, "check result: %d\n", device_status->check_result);
     cursor += delta;
 
-    delta = sprintf(cursor, "max pipes count: %d\n", device_status->max_pipes_count);
+    delta = sprintf(cursor, "pipes count: %d\n", device_status->pipes_count);
     cursor += delta;
 
-    delta = sprintf(cursor, "free pipes count: %d\n", device_status->free_pipes_count);
+    delta = sprintf(cursor, "secret key count: %d\n", device_status->secret_key_count);
+    cursor += delta;
+
+    delta = sprintf(cursor, "public key count: %d\n", device_status->public_key_count);
+    cursor += delta;
+
+    delta = sprintf(cursor, "private key count: %d\n", device_status->private_key_count);
     cursor += delta;
 
     return cursor - buf;

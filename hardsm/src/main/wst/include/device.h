@@ -34,7 +34,8 @@ void dev_refresh_device_contexts(DeviceContext *device_list, int device_count);
 
 int dev_check_device(DeviceContext *device_context);
 
-int dev_pipes_count(DeviceContext *device_context, int *max_pipes_count, int *free_pipes_count);
+int dev_status_count(DeviceContext *device_context, int *pipes_count, int *free_pipes_count,
+                     int *secret_key_count, int *public_key_count, int *private_key_count);
 
 
 #ifdef __cplusplus

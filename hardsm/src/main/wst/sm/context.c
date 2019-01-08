@@ -79,7 +79,9 @@ int ctx_get_device_status(int index, DeviceStatus *device_status) {
     device_status->opened = NULL != device_context->h_device;
     device_status->check_result = device_context->check_result;
 
-    return dev_pipes_count(device_context, &(device_status->max_pipes_count), &(device_status->free_pipes_count));
+    return dev_status_count(device_context, &(device_status->pipes_count), &(device_status->free_pipes_count),
+                            &(device_status->secret_key_count), &(device_status->public_key_count),
+                            &(device_status->private_key_count));
 }
 
 DeviceStatuses ctx_get_device_statuses() {
@@ -115,6 +117,9 @@ int init() {
     error_code = init_statistics();
     if (error_code != YERR_SUCCESS) return error_code;
 
+    error_code = init_key_context();
+    if (error_code != YERR_SUCCESS) return error_code;
+
     return error_code;
 }
 
@@ -122,10 +127,12 @@ int ctx_open_pipe(int index) {
     int error_code = check_device_index(index);
     if (error_code != YERR_SUCCESS)  return error_code;
 
-    int max_pipes_count = 0;
+    int pipes_count = 0;
     int free_pipes_count = 0;
+    int secret_key_count, public_key_count, private_key_count;
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
-    error_code = dev_pipes_count(device_context, &max_pipes_count, &free_pipes_count);
+    error_code = dev_status_count(device_context, &pipes_count, &free_pipes_count, &secret_key_count,
+                                  &public_key_count, &private_key_count);
     if (error_code != YERR_SUCCESS) return error_code;
 
     error_code = pp_open_pipe(device_context, free_pipes_count);
@@ -253,6 +260,20 @@ int ctx_random(int device_index, int pipe_index, char *out, int out_len) {
 
     SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
     return crypto_random(h_pipe, out, out_len);
+}
+
+int ctx_generate_key(int device_index, int pipe_index, char *out, int out_len) {
+    int error_code = YERR_SUCCESS;
+
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
+
+    SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
+    return key_generate_key(h_pipe, device_context->h_auth_key, out, out_len);
 }
 
 

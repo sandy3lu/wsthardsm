@@ -78,7 +78,7 @@ static void init_hash_algorithm() {
 
 static void init_mac_algorithm() {
     memset(&g_mac_algorithm, 0, sizeof(SM_ALGORITHM));
-    g_mac_algorithm.AlgoType = SMM_ALG34_MAC;
+    g_mac_algorithm.AlgoType = SMM_ALG35_MAC;
     g_mac_algorithm.pParameter = g_byiv;
     g_mac_algorithm.uiParameterLen = SMMA_ALG34_IV_LEN;
 }

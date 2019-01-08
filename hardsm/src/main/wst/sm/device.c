@@ -98,7 +98,8 @@ int dev_check_device(DeviceContext *device_context) {
     return error_code;
 }
 
-int dev_pipes_count(DeviceContext *device_context, int *max_pipes_count, int *free_pipes_count) {
+int dev_status_count(DeviceContext *device_context, int *pipes_count, int *free_pipes_count,
+                     int *secret_key_count, int *public_key_count, int *private_key_count) {
     int error_code = check_device_opened(device_context);
     if (YERR_SUCCESS != error_code) return error_code;
 
@@ -106,7 +107,22 @@ int dev_pipes_count(DeviceContext *device_context, int *max_pipes_count, int *fr
     error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
     if (error_code != YERR_SUCCESS) return error_code;
 
-    *max_pipes_count = device_context->device_info.stDevResourceInfo.wMaxPipeCount;
-    *free_pipes_count = device_context->device_info.stDevResourceInfo.wFreePipeCount;
+    int max_pipes_count = device_context->device_info.stDevResourceInfo.wMaxPipeCount;
+    int _free_pipes_count = device_context->device_info.stDevResourceInfo.wFreePipeCount;
+    *pipes_count = max_pipes_count - _free_pipes_count;
+    *free_pipes_count = _free_pipes_count;
+
+    int max_secret_key_count = device_context->device_info.stDevResourceInfo.wMaxSecretKeyCount;
+    int free_secret_key_count = device_context->device_info.stDevResourceInfo.wFreeSecretKeyCount;
+    *secret_key_count = max_secret_key_count - free_secret_key_count;
+
+    int max_public_key_count = device_context->device_info.stDevResourceInfo.wMaxPublicKeyCount;
+    int free_public_key_count = device_context->device_info.stDevResourceInfo.wFreePublicKeyCount;
+    *public_key_count = max_public_key_count - free_public_key_count;
+
+    int max_private_key_count = device_context->device_info.stDevResourceInfo.wMaxPrivateKeyCount;
+    int free_private_key_count = device_context->device_info.stDevResourceInfo.wFreePrivateKeyCount;
+    *private_key_count = max_private_key_count - free_private_key_count;
+
     return YERR_SUCCESS;
 }

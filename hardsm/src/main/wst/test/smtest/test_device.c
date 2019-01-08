@@ -35,6 +35,7 @@ void test_device() {
 
 
     test_crypto();
+    test_key();
 
 
     error_code = ctx_logout(0);
@@ -45,13 +46,12 @@ void test_device() {
     error_code = ctx_close_all_pipe(0);
     if (error_code != YERR_SUCCESS) print_error(error_code);
 
-    error_code = ctx_close_all_devices();
-    if (error_code != YERR_SUCCESS) print_error(error_code);
-
-
-    char buf3[1024 * 32] = {0};
+    char buf1[1024 * 32] = {0};
     DeviceStatuses device_statuses = ctx_get_device_statuses();
     printf("len: %d\n", device_statuses.count);
-    print_device_statuses(&device_statuses, buf3);
-    printf("%s\n", buf3);
+    print_device_statuses(&device_statuses, buf1);
+    printf("%s\n", buf1);
+
+    error_code = ctx_close_all_devices();
+    if (error_code != YERR_SUCCESS) print_error(error_code);
 }

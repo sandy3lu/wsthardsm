@@ -43,7 +43,7 @@ static void test_digest_section() {
 
 static void test_random() {
     char out[1024] = {0};
-    int out_len = 8;
+    int out_len = 32;
 
     int error_code = ctx_random(0, 0, out, out_len);
     if (error_code != YERR_SUCCESS) print_error(error_code);

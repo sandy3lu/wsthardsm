@@ -13,8 +13,11 @@ typedef struct {
     bool opened;
     int check_result;
     int logged_in;
-    int max_pipes_count;
+    int pipes_count;
     int free_pipes_count;
+    int secret_key_count;
+    int public_key_count;
+    int private_key_count;
 } DeviceStatus;
 
 typedef struct {
