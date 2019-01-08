@@ -16,6 +16,8 @@ int pp_login(DeviceContext *device_context, const char *pin_code);
 
 int pp_logout(DeviceContext *device_context);
 
+SM_PIPE_HANDLE get_opened_pipe(DeviceContext *device_context);
+
 
 #ifdef __cplusplus
 }

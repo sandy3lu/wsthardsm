@@ -3,9 +3,7 @@
 #include "../include/sm_api.h"
 #include "../include/util.h"
 #include "../include/device.h"
-
-
-static SM_PIPE_HANDLE get_opened_pipe(DeviceContext *device_context);
+#include "../include/pipe.h"
 
 
 int pp_open_pipe(DeviceContext *device_context, int free_pipes_count) {
@@ -117,7 +115,7 @@ int pp_logout(DeviceContext *device_context) {
     return error_code;
 }
 
-static SM_PIPE_HANDLE get_opened_pipe(DeviceContext *device_context) {
+SM_PIPE_HANDLE get_opened_pipe(DeviceContext *device_context) {
     SM_PIPE_HANDLE pipe = NULL;
     int i;
     for (i = 0; i < device_context->pipes_len && pipe == NULL; i++) {

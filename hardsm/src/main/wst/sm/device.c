@@ -6,13 +6,25 @@
 #include "../include/device.h"
 
 
+static int check_device_opened(DeviceContext *device_context) {
+    if (NULL == device_context->h_device) return DEVICE_NOT_OPENED;
+    return YERR_SUCCESS;
+}
+
 static int open_device(DeviceContext *device_context) {
-    return SM_OpenDevice(device_context->index, false, &(device_context->h_device));
+    if (YERR_SUCCESS == check_device_opened(device_context)) return YERR_SUCCESS;
+
+    SM_DEVICE_HANDLE h_device = NULL;
+    int error_code = SM_OpenDevice(device_context->index, false, &h_device);
+    if (error_code == YERR_SUCCESS) {
+        device_context->h_device = h_device;
+    }
+    return error_code;
 
 }
 
 static void get_mechanisms(DeviceContext *device_context) {
-    if (NULL == device_context->h_device) return;
+    if (YERR_SUCCESS != check_device_opened(device_context)) return;
 
     int mechanism_list[MAX_MECHANISM_LEN] = {0};
     int mechanisms_len = 0;
@@ -36,7 +48,7 @@ static void get_mechanisms(DeviceContext *device_context) {
 }
 
 static void get_device_info(DeviceContext *device_context) {
-    if (NULL == device_context->h_device) return;
+    if (YERR_SUCCESS != check_device_opened(device_context)) return;
 
     int error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
     if (error_code != YERR_SUCCESS ) {
@@ -45,11 +57,9 @@ static void get_device_info(DeviceContext *device_context) {
 }
 
 int dev_init_device(DeviceContext *device_context) {
-    if (NULL == device_context->h_device) {
+    if (YERR_SUCCESS != check_device_opened(device_context)) {
         int error_code = open_device(device_context);
-        if (error_code != YERR_SUCCESS) {
-            return error_code;
-        }
+        if (error_code != YERR_SUCCESS) return error_code;
     }
 
     get_mechanisms(device_context);
@@ -69,32 +79,31 @@ void dev_refresh_device_contexts(DeviceContext *device_list, int device_count) {
 
 int dev_close_device(DeviceContext *device_context) {
     if (NULL != device_context->h_device) {
-        int error_code = SM_CloseDevice(device_context->h_device);
+        SM_DEVICE_HANDLE h_device = device_context->h_device;
+        int error_code = SM_CloseDevice(h_device);
         if (error_code != YERR_SUCCESS) {
             return error_code;
-        } else {
-            device_context->h_device = NULL;
         }
+        device_context->h_device = NULL;
     }
 
     return YERR_SUCCESS;
 }
 
 int dev_check_device(DeviceContext *device_context) {
-    if (NULL == device_context->h_device) {
-        return DEVICE_NOT_OPENED;
-    }
+    int error_code = check_device_opened(device_context);
+    if (YERR_SUCCESS != error_code) return error_code;
 
-    int error_code = SM_TestDevice(device_context->h_device, (PSM_UINT)&(device_context->check_result));
+    error_code = SM_TestDevice(device_context->h_device, (PSM_UINT)&(device_context->check_result));
     return error_code;
 }
 
 int dev_pipes_count(DeviceContext *device_context, int *max_pipes_count, int *free_pipes_count) {
-    if (NULL == device_context->h_device) {
-        return DEVICE_NOT_OPENED;
-    }
+    int error_code = check_device_opened(device_context);
+    if (YERR_SUCCESS != error_code) return error_code;
+
     // refresh device info
-    int error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
+    error_code = SM_GetDeviceInfo(device_context->h_device, &(device_context->device_info));
     if (error_code != YERR_SUCCESS) return error_code;
 
     *max_pipes_count = device_context->device_info.stDevResourceInfo.wMaxPipeCount;

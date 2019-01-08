@@ -8,6 +8,7 @@
 #include "../include/context.h"
 #include "../include/crypto.h"
 #include "../include/pipe.h"
+#include "../include/key.h"
 
 
 static CryptoContext g_crypto_context;
@@ -152,7 +153,19 @@ int ctx_login(int index, const char *pin_code) {
     if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
-    return pp_login(device_context, pin_code);
+    error_code = pp_login(device_context, pin_code);
+    if (error_code != YERR_SUCCESS)  return error_code;
+
+    SM_PIPE_HANDLE h_pipe = get_opened_pipe(device_context);
+
+    if (NULL == device_context->h_auth_key) {
+        SM_KEY_HANDLE h_auth_key = NULL;
+        error_code = key_open_config_key(h_pipe, &h_auth_key);
+        if (error_code != YERR_SUCCESS) return error_code;
+        device_context->h_auth_key = h_auth_key;
+    }
+
+    return error_code;
 }
 
 int ctx_logout(int index) {
@@ -160,6 +173,15 @@ int ctx_logout(int index) {
     if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    SM_PIPE_HANDLE h_pipe = get_opened_pipe(device_context);
+
+    if (NULL != device_context->h_auth_key) {
+        SM_KEY_HANDLE h_auth_key = device_context->h_auth_key;
+        error_code = key_close_config_key(h_pipe, h_auth_key);
+        if (error_code != YERR_SUCCESS) return error_code;
+        device_context->h_auth_key = NULL;
+    }
+
     return pp_logout(device_context);
 }
 
@@ -232,6 +254,7 @@ int ctx_random(int device_index, int pipe_index, char *out, int out_len) {
     SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
     return crypto_random(h_pipe, out, out_len);
 }
+
 
 static int init_statistics() {
     int error_code = YERR_SUCCESS;

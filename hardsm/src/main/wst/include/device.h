@@ -20,6 +20,7 @@ typedef struct {
     int mechanisms_len;
     SM_DEVICE_INFO device_info;
     SM_DEVICE_HANDLE h_device;
+    SM_KEY_HANDLE h_auth_key;
     SM_PIPE_HANDLE h_pipes[MAX_PIPE_LEN];
     int pipes_len;
 } DeviceContext;
