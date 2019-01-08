@@ -44,6 +44,13 @@ int ctx_logout(int index);
 
 int ctx_digest(int device_index, int pipe_index, const char *data, int data_len, char *out, int out_len);
 
+int ctx_digest_init(int device_index, int pipe_index);
+
+int ctx_digest_update(int device_index, int pipe_index, const char *data, int data_len);
+
+int ctx_digest_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int out_len);
+
+
 void ctx_print_context(char *buf, int buf_len, bool verbose);
 
 int print_device_context(DeviceContext *device_context, char *buf);

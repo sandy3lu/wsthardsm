@@ -10,19 +10,6 @@
 #include "../../include/context.h"
 
 
-static void test_digest() {
-    int pipe_index = 0;
-    const char *data = "abc";
-    char out[1024] = {0};
-    int out_len = sizeof(out);
-
-    for (pipe_index = -100; pipe_index < 100; pipe_index++) {
-        int error_code = ctx_digest(0, pipe_index, data, strlen(data), out, out_len);
-        if (error_code != YERR_SUCCESS) print_error(error_code);
-        printf("digest of data %s is %s\n", data, out);
-    }
-}
-
 void test_device() {
     int error_code = YERR_SUCCESS;
 
@@ -45,7 +32,7 @@ void test_device() {
     if (error_code != YERR_SUCCESS) print_error(error_code);
 
 
-    test_digest();
+    test_crypto();
 
 
     error_code = ctx_logout(0);

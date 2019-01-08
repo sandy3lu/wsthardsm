@@ -13,7 +13,8 @@
 static CryptoContext g_crypto_context;
 static int init_statistics();
 static int check_device_index(int index);
-static int check_pipe_index(int device_index, int pipe_index);
+static int check_context_status(int device_index);
+static int hash_index(int index, int count);
 
 
 void ctx_print_context(char *buf, int buf_len, bool verbose) {
@@ -38,21 +39,20 @@ void ctx_print_context(char *buf, int buf_len, bool verbose) {
 }
 
 int ctx_open_device(int index) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     device_context->index = index;
-    int error_code = dev_init_device(device_context);
+    error_code = dev_init_device(device_context);
 
     return error_code;
 }
 
 int ctx_close_device(int index) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
+
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return dev_close_device(device_context);
 }
@@ -68,9 +68,8 @@ int ctx_close_all_devices() {
 }
 
 int ctx_get_device_status(int index, DeviceStatus *device_status) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     memset(device_status, 0, sizeof(DeviceStatus));
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
@@ -100,9 +99,8 @@ int ctx_device_count() {
 }
 
 int ctx_check_device(int index) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return dev_check_device(device_context);
@@ -120,14 +118,13 @@ int init() {
 }
 
 int ctx_open_pipe(int index) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     int max_pipes_count = 0;
     int free_pipes_count = 0;
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
-    int error_code = dev_pipes_count(device_context, &max_pipes_count, &free_pipes_count);
+    error_code = dev_pipes_count(device_context, &max_pipes_count, &free_pipes_count);
     if (error_code != YERR_SUCCESS) return error_code;
 
     error_code = pp_open_pipe(device_context, free_pipes_count);
@@ -135,36 +132,32 @@ int ctx_open_pipe(int index) {
 }
 
 int ctx_close_pipe(int index) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return pp_close_all_pipe(device_context);
 }
 
 int ctx_close_all_pipe(int index) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return pp_close_all_pipe(device_context);
 }
 
 int ctx_login(int index, const char *pin_code) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return pp_login(device_context, pin_code);
 }
 
 int ctx_logout(int index) {
-    if (index < 0 || index >= g_crypto_context.device_count) {
-        return INDEX_OUTOF_BOUND;
-    }
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return pp_logout(device_context);
@@ -173,15 +166,57 @@ int ctx_logout(int index) {
 int ctx_digest(int device_index, int pipe_index, const char *data, int data_len, char *out, int out_len) {
     int error_code = YERR_SUCCESS;
 
-    error_code = check_pipe_index(device_index, pipe_index);
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
     if (error_code != YERR_SUCCESS) return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
-    pipe_index = abs(pipe_index);
-    pipe_index %= device_context->pipes_len;
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
 
     SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
     return crypto_digest(h_pipe, data, data_len, out, out_len);
+}
+
+int ctx_digest_init(int device_index, int pipe_index) {
+    int error_code = YERR_SUCCESS;
+
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
+
+    SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
+    return crypto_digest_init(h_pipe);
+}
+
+int ctx_digest_update(int device_index, int pipe_index, const char *data, int data_len) {
+    int error_code = YERR_SUCCESS;
+
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
+
+    SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
+    return crypto_digest_update(h_pipe, data, data_len);
+}
+
+int ctx_digest_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int out_len) {
+    int error_code = YERR_SUCCESS;
+
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
+
+    SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
+    return crypto_digest_final(h_pipe, data, data_len, out, out_len);
 }
 
 static int init_statistics() {
@@ -213,7 +248,7 @@ static int check_device_index(int index) {
     return YERR_SUCCESS;
 }
 
-static int check_pipe_index(int device_index, int pipe_index) {
+static int check_context_status(int device_index) {
     int error_code = YERR_SUCCESS;
 
     error_code = check_device_index(device_index);
@@ -231,4 +266,11 @@ static int check_pipe_index(int device_index, int pipe_index) {
     }
 
     return error_code;
+}
+
+static int hash_index(int index, int count) {
+    assert(count > 0);
+    index = abs(index);
+    index %= count;
+    return index;
 }
