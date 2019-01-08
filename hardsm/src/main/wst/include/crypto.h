@@ -5,12 +5,20 @@
 extern "C" {
 #endif
 
+#define MAX_RANDOM_LEN    1024
+
 
 int crypto_init_context();
+
 int crypto_digest(SM_PIPE_HANDLE h_pipe, const char *data, int data_len, char *out, int out_len);
+
 int crypto_digest_init(SM_PIPE_HANDLE h_pipe);
+
 int crypto_digest_update(SM_PIPE_HANDLE h_pipe, const char *data, int data_len);
+
 int crypto_digest_final(SM_PIPE_HANDLE h_pipe, const char *data, int data_len, char *out, int out_len);
+
+int crypto_random(SM_PIPE_HANDLE h_pipe, char *out, int out_len);
 
 
 #ifdef __cplusplus

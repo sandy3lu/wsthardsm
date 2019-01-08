@@ -3,6 +3,7 @@
 #include "../include/sm_api.h"
 #include "../include/util.h"
 #include "../include/device.h"
+#include "../include/crypto.h"
 
 
 static SM_BYTE g_byiv[SMMA_ALG34_IV_LEN];
@@ -51,6 +52,19 @@ int crypto_digest_final(SM_PIPE_HANDLE h_pipe, const char *data, int data_len, c
     if (error_code != YERR_SUCCESS) return error_code;
 
     to_hex(out, out_len, digest, digest_len);
+
+    return YERR_SUCCESS;
+}
+
+int crypto_random(SM_PIPE_HANDLE h_pipe, char *out, int out_len) {
+    int random_len = (out_len - 1) / 2;
+    if (random_len > MAX_RANDOM_LEN) return RANDOM_LEN_OUTOF_BOUND;
+
+    char random[MAX_RANDOM_LEN] = {0};
+    int error_code = SM_GenRandom(h_pipe, 0, (PSM_BYTE)random, random_len);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    to_hex(out, out_len, random, random_len);
 
     return YERR_SUCCESS;
 }

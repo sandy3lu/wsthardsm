@@ -219,6 +219,20 @@ int ctx_digest_final(int device_index, int pipe_index, const char *data, int dat
     return crypto_digest_final(h_pipe, data, data_len, out, out_len);
 }
 
+int ctx_random(int device_index, int pipe_index, char *out, int out_len) {
+    int error_code = YERR_SUCCESS;
+
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
+
+    SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
+    return crypto_random(h_pipe, out, out_len);
+}
+
 static int init_statistics() {
     int error_code = YERR_SUCCESS;
     CryptoContext *crypto_context = &(g_crypto_context);

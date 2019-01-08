@@ -41,8 +41,19 @@ static void test_digest_section() {
     printf("digest of data %s is %s\n", data, out);
 }
 
+static void test_random() {
+    char out[1024] = {0};
+    int out_len;
+
+    for (out_len = 0; out_len < 20; out_len++) {
+        int error_code = ctx_random(0, 0, out, out_len);
+        if (error_code != YERR_SUCCESS) print_error(error_code);
+        else printf("random: %s\n", out);
+    }
+}
 
 void test_crypto() {
     test_digest();
     test_digest_section();
+    test_random();
 }

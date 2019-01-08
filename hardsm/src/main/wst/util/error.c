@@ -21,6 +21,7 @@ void init_error_string() {
     MSGS[PIPE_RESOURCE_EXCEEDED] = "pipe resource exceeded";
     MSGS[BUFSIZE_TOO_SMALL] = "buf size too small";
     MSGS[NEED_LOGIN] = "need login";
+    MSGS[RANDOM_LEN_OUTOF_BOUND] = "random length out of bound";
 }
 
 char *get_error_string(int code) {
