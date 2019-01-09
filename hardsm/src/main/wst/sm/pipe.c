@@ -108,10 +108,19 @@ int pp_logout(DeviceContext *device_context) {
     if (NULL == pipe) return PIPE_NOT_OPENED;
     if (!device_context->logged_in) return YERR_SUCCESS;
 
+    // SM_login will load secret key and key pairs from ukey into card, and stores them in card during login session.
+    // To be specific, it's one secret key, two sm2 key pairs.
+    // But for unknown reason, SM_Logout doesn't clear out these keys, these keys will permanently occupy limited card
+    // storage. What's more, every login and logout manipulation will occupy card storage a little, and finally will
+    // run out of card storage.
+    // And I found that if don't choose to logout, then occupied storage will not increase, strangely.
+    // There is no good way to solve it by now, but we can unload and load card each time when we use card to get around
+    // of the problem.
     int error_code = SM_Logout(pipe);
     if (error_code == YERR_SUCCESS) {
         device_context->logged_in = false;
     }
+
     return error_code;
 }
 

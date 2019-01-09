@@ -163,9 +163,9 @@ int ctx_login(int index, const char *pin_code) {
     error_code = pp_login(device_context, pin_code);
     if (error_code != YERR_SUCCESS)  return error_code;
 
-    SM_PIPE_HANDLE h_pipe = get_opened_pipe(device_context);
 
     if (NULL == device_context->h_auth_key) {
+        SM_PIPE_HANDLE h_pipe = get_opened_pipe(device_context);
         SM_KEY_HANDLE h_auth_key = NULL;
         error_code = key_open_config_key(h_pipe, &h_auth_key);
         if (error_code != YERR_SUCCESS) return error_code;
@@ -180,9 +180,9 @@ int ctx_logout(int index) {
     if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
-    SM_PIPE_HANDLE h_pipe = get_opened_pipe(device_context);
 
     if (NULL != device_context->h_auth_key) {
+        SM_PIPE_HANDLE h_pipe = get_opened_pipe(device_context);
         SM_KEY_HANDLE h_auth_key = device_context->h_auth_key;
         error_code = key_close_config_key(h_pipe, h_auth_key);
         if (error_code != YERR_SUCCESS) return error_code;

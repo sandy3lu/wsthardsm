@@ -40,8 +40,6 @@ void test_device() {
 
     error_code = ctx_logout(0);
     if (error_code != YERR_SUCCESS) print_error(error_code);
-    error_code = ctx_logout(0);
-    if (error_code != YERR_SUCCESS) print_error(error_code);
 
     error_code = ctx_close_all_pipe(0);
     if (error_code != YERR_SUCCESS) print_error(error_code);
