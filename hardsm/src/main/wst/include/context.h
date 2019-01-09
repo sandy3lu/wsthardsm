@@ -108,7 +108,7 @@ int ctx_digest(int device_index, int pipe_index, const char *data, int data_len,
 int ctx_random(int device_index, int pipe_index, char *out, int out_len);
 
 /* 生成 SM4 对称密钥，128 bits，以 16 进制编码存储于 out 中，out_len 必须不小于 16 * 2 + 1 = 33  */
-int ctx_generate_key(int device_index, int pipe_index, char *out, int out_len);
+int ctx_generate_key(int device_index, int pipe_index, bool protect, char *out, int out_len);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

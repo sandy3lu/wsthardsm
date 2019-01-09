@@ -15,7 +15,11 @@ static void test_generate_key() {
     char out[1024] = {0};
     int out_len = sizeof(out);
 
-    int error_code = ctx_generate_key(0, pipe_index, out, out_len);
+    int error_code = ctx_generate_key(0, pipe_index, true, out, out_len);
+    if (error_code != YERR_SUCCESS) print_error(error_code);
+    printf("key: %s\n", out);
+
+    error_code = ctx_generate_key(0, pipe_index, false, out, out_len);
     if (error_code != YERR_SUCCESS) print_error(error_code);
     printf("key: %s\n", out);
 }

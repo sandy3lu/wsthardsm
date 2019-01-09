@@ -37,7 +37,7 @@ int key_close_config_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_Key) {
  * 2. export key
  * 3. destroy key
  */
-int key_generate_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, char *out, int out_len) {
+int key_generate_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool protect, char *out, int out_len) {
     if (out_len <= SMMA_ALG35_BLOCK_LEN * 2) return BUFSIZE_TOO_SMALL;
 
     SM_KEY_HANDLE h_key = NULL;
@@ -46,7 +46,15 @@ int key_generate_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, char *out,
 
     char export_key[SMMA_ALG35_BLOCK_LEN] = {0};
     int key_len = sizeof(export_key);
-    error_code = SM_ExportKey(h_pipe, h_auth_key, h_key, &g_export_algorithm, (PSM_BYTE)export_key, (PSM_WORD)&key_len);
+
+    PSM_ALGORITHM algorithm = NULL;
+    if (protect) {
+        algorithm = &g_export_algorithm;
+    } else {
+        h_auth_key = NULL;
+    }
+
+    error_code = SM_ExportKey(h_pipe, h_key, h_auth_key, algorithm, (PSM_BYTE)export_key, (PSM_WORD)&key_len);
     if (error_code != YERR_SUCCESS) return error_code;
     assert(key_len <= sizeof(export_key));
     to_hex(out, out_len, export_key, key_len);
@@ -69,11 +77,13 @@ static void init_key_attr_sm4() {
 
 /* Crypto card can exports all keys (except public key) in ciphertext form. You can choose encrypt exported keys
  * with sm4 (ECB or CBC) or sm3 or sm2.
- * Here we choose sm4 ECB to encrypt it, the simplest way, so pParameter is NULL.
- */
+ * Here we choose sm4 ECB to encrypt it, the simplest way, so pParameter is NULL. */
 static void init_export_algorithm() {
     memset(&g_export_algorithm, 0, sizeof(SM_ALGORITHM));
-    g_export_algorithm.AlgoType = SMM_ALG35_ECB;
+    /* For unknown reason, it's only support ALG34. If use ALG35 then raise KEY TYPE ERROR!
+     * But I prefer ALG35.
+     * Why use ECB mode? First, keys are short, no need to use CBC or other mode; Second, no iv needed; Third, simple */
+    g_export_algorithm.AlgoType = SMM_ALG34_ECB;
     g_export_algorithm.pParameter = NULL;
     g_export_algorithm.uiParameterLen = 0;
 }

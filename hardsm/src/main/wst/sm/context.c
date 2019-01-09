@@ -262,7 +262,7 @@ int ctx_random(int device_index, int pipe_index, char *out, int out_len) {
     return crypto_random(h_pipe, out, out_len);
 }
 
-int ctx_generate_key(int device_index, int pipe_index, char *out, int out_len) {
+int ctx_generate_key(int device_index, int pipe_index, bool protect, char *out, int out_len) {
     int error_code = YERR_SUCCESS;
 
     device_index = hash_index(device_index, g_crypto_context.device_count);
@@ -273,7 +273,7 @@ int ctx_generate_key(int device_index, int pipe_index, char *out, int out_len) {
     pipe_index = hash_index(pipe_index, device_context->pipes_len);
 
     SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
-    return key_generate_key(h_pipe, device_context->h_auth_key, out, out_len);
+    return key_generate_key(h_pipe, device_context->h_auth_key, protect, out, out_len);
 }
 
 
