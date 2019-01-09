@@ -62,10 +62,10 @@ void ctx_print_context(char *buf, int buf_len, bool verbose);
  * 一次性打开所有通道，是为了上层以多线程方式调用加密卡，充分利用加密卡资源，提升性能。
  * 该函数也是幂等的，可重复调用，无副作用。
  */
-int ctx_open_pipe(int index);
+int ctx_open_pipes(int index);
 
 /* 关闭某个加密卡上的所有安全通道，满足幂等性 */
-int ctx_close_pipe(int index);
+int ctx_close_pipes(int index);
 
 /* 关闭某个加密卡上的所有安全通道，满足幂等性，实现方式与 ctx_close_pipe 不同。
  * ctx_close_pipe 是手动一个一个关闭通道的，而本函数是调用加密卡方法一次性关闭的。

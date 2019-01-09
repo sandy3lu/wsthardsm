@@ -123,7 +123,7 @@ int init() {
     return error_code;
 }
 
-int ctx_open_pipe(int index) {
+int ctx_open_pipes(int index) {
     int error_code = check_device_index(index);
     if (error_code != YERR_SUCCESS)  return error_code;
 
@@ -139,7 +139,7 @@ int ctx_open_pipe(int index) {
     return error_code;
 }
 
-int ctx_close_pipe(int index) {
+int ctx_close_pipes(int index) {
     int error_code = check_device_index(index);
     if (error_code != YERR_SUCCESS)  return error_code;
 
