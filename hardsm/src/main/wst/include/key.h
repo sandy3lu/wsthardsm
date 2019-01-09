@@ -18,6 +18,11 @@ int key_generate_keypair(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key,
                          char *public_key, int public_key_len,
                          char *private_key, int private_key_len);
 
+int key_import_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool protect,
+                      const char *hex_secret_key, PSM_KEY_HANDLE ph_key);
+
+int key_destroy_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_key);
+
 
 #ifdef __cplusplus
 }

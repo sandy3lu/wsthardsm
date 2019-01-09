@@ -8,7 +8,6 @@ extern "C" {
 
 void test_util();
 void test_device();
-void test_error();
 void test_crypto();
 void test_key();
 

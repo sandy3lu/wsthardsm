@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
-#include "../include/device.h"
+#include "../include/key.h"
 #include "../include/crypto.h"
 
 
@@ -12,6 +12,7 @@ static SM_ALGORITHM g_mac_algorithm;
 
 static void init_mac_algorithm();
 static void init_hash_algorithm();
+static int is_length_valid(int plain_data_len, int secret_data_len);
 
 
 int crypto_init_context() {
@@ -69,6 +70,62 @@ int crypto_random(SM_PIPE_HANDLE h_pipe, char *out, int out_len) {
     return YERR_SUCCESS;
 }
 
+/* encrypt or decrypt data
+ * 1. import key
+ * 2. encrypt
+ * 3. destroy key */
+int crypto_crypt(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool encrypt, const char *hex_secret_key,
+                 bool protect, const char *hex_iv, const char *data, int data_len, char *out, int *out_len) {
+    int error_code = is_length_valid(data_len, *out_len);
+    if (error_code != YERR_SUCCESS) return error_code;
+    if (NULL != hex_iv) {
+        if (strlen(hex_iv) != SMMA_ALG35_BLOCK_LEN * 2) return IV_LENGTH_INVALID;
+    }
+
+    SM_KEY_HANDLE h_key = NULL;
+    error_code = key_import_key(h_pipe, h_auth_key, protect, hex_secret_key, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    SM_BLOB_KEY blob_key;
+    memset(&blob_key, 0, sizeof(SM_BLOB_KEY));
+    blob_key.pbyData = (SM_BYTE*)&h_key;
+    blob_key.uiDataLen = sizeof(SM_KEY_HANDLE);
+
+    SM_ALGORITHM algorithm;
+    memset(&algorithm, 0, sizeof(SM_ALGORITHM));
+    if (NULL != hex_iv) {
+        char iv[SMMA_ALG35_BLOCK_LEN] = {0};
+        int iv_len = sizeof(iv);
+        from_hex(iv, &iv_len, hex_iv);
+        algorithm.AlgoType = SMM_ALG35_CBC;
+        algorithm.pParameter = iv;
+        algorithm.uiParameterLen = SMMA_ALG35_IV_LEN;
+    } else {
+        algorithm.AlgoType = SMM_ALG35_ECB;
+        algorithm.pParameter = NULL;
+        algorithm.uiParameterLen = 0;
+    }
+
+    if (encrypt) {
+        error_code = SM_Encrypt(h_pipe, &blob_key, &algorithm, true, (PSM_BYTE)data,
+                                data_len, (PSM_BYTE)out, (PSM_UINT)out_len);
+    } else {
+        error_code = SM_Decrypt(h_pipe, &blob_key, &algorithm, true, (PSM_BYTE)data,
+                                data_len, (PSM_BYTE)out, (PSM_UINT)out_len);
+    }
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    error_code = key_destroy_key(h_pipe, h_key);
+    if (error_code != YERR_SUCCESS) goto fail;
+    h_key = NULL;
+
+    return error_code;
+
+fail:
+    if (h_key != NULL) key_destroy_key(h_pipe, h_key);
+    return error_code;
+}
+
 static void init_hash_algorithm() {
     memset(&g_hash_algorithm, 0, sizeof(SM_ALGORITHM));
     g_hash_algorithm.AlgoType = SMM_SCH_256;
@@ -81,4 +138,11 @@ static void init_mac_algorithm() {
     g_mac_algorithm.AlgoType = SMM_ALG35_MAC;
     g_mac_algorithm.pParameter = g_byiv;
     g_mac_algorithm.uiParameterLen = SMMA_ALG34_IV_LEN;
+}
+
+static int is_length_valid(int plain_data_len, int secret_data_len) {
+    int block_len = SMMA_ALG35_BLOCK_LEN;
+    int expected_len = (plain_data_len / block_len + 1) * block_len;
+    if (secret_data_len < expected_len) return BUFSIZE_TOO_SMALL;
+    return YERR_SUCCESS;
 }

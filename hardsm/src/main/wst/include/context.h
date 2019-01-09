@@ -12,6 +12,7 @@ typedef struct {
     int device_type;
     char api_version[33];
     int device_count;
+    bool protect_key;
     DeviceContext device_list[MAX_DEVICE_NUMBER];
 } CryptoContext;
 
@@ -74,6 +75,13 @@ int ctx_login(int index, const char *pin_code);
 /* 登出某个加密卡，满足幂等性 */
 int ctx_logout(int index);
 
+/* 设置全局标志，是否对导出的密钥进行加密保护
+ * 默认情况下，对导出的对称密钥和公钥不做加密保护，对导出的私钥使用 SMM_ALG34_ECB 算法进行加密保护
+ * 若开启保护标志，则也对对称密钥使用 SMM_ALG34_ECB 算法进行加密保护 */
+void ctx_set_protect_key_flag(bool flag);
+
+bool ctx_get_protect_key_flag();
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                      算法
@@ -100,13 +108,18 @@ int ctx_digest(int device_index, int pipe_index, const char *data, int data_len,
  * 3 < len(out_len) < 2045 */
 int ctx_random(int device_index, int pipe_index, char *out, int out_len);
 
-/* 生成 SM4 对称密钥，128 bits，以 16 进制编码存储于 out 中，out_len 必须不小于 16 * 2 + 1 = 33
- * protect = true 时密钥以密文形式导出
- * protect = false 时密钥以明文形式导出 */
-int ctx_generate_key(int device_index, int pipe_index, bool protect, char *out, int out_len);
+/* 生成 SM4 对称密钥，128 bits，以 16 进制编码存储于 out 中，out_len 必须不小于 16 * 2 + 1 = 33 */
+int ctx_generate_key(int device_index, int pipe_index, char *out, int out_len);
 
 int ctx_generate_keypair(int device_index, int pipe_index,
                          char *public_key, int public_key_len, char *private_key, int private_key_len);
+
+int ctx_encrypt(int device_index, int pipe_index, const char *hex_secret_key,
+                const char *hex_iv, const char *data, int data_len, char *out, int *out_len);
+
+int ctx_decrypt(int device_index, int pipe_index, const char *hex_secret_key,
+                const char *hex_iv, const char *data, int data_len, char *out, int *out_len);
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* 以下为模块内部调用函数 */

@@ -2,7 +2,6 @@
 #include <assert.h>
 #include "../include/sm_api.h"
 #include "../include/util.h"
-#include "../include/device.h"
 #include "../include/key.h"
 
 
@@ -42,6 +41,35 @@ int key_close_config_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_Key) {
     return SM_CloseTokKeyHdl(h_pipe, h_auth_Key);
 }
 
+int key_import_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool protect,
+                      const char *hex_secret_key, PSM_KEY_HANDLE ph_key) {
+    if (strlen(hex_secret_key) > SMMA_ALG35_BLOCK_LEN * 2) return KEY_TOO_LONG;
+
+    char secret_key[SMMA_ALG35_BLOCK_LEN] = {0};
+    int key_len = 0;
+    from_hex(secret_key, &key_len, hex_secret_key);
+    assert(key_len <= sizeof(secret_key));
+
+    PSM_ALGORITHM algorithm = NULL;
+    if (protect) {
+        algorithm = &g_export_algorithm;
+    } else {
+        h_auth_key = NULL;
+    }
+
+    SM_KEY_HANDLE h_key = NULL;
+    int error_code = SM_ImportKey(h_pipe, (PSM_BYTE)secret_key, key_len,
+                                  h_auth_key, algorithm, &g_key_attr_sm4, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    *ph_key = h_key;
+
+    return YERR_SUCCESS;
+}
+
+int key_destroy_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_key) {
+    return SM_DestroyKey(h_pipe, h_key);
+}
+
 /* 1. generate key
  * 2. export key
  * 3. destroy key
@@ -68,14 +96,14 @@ int key_generate_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool prote
     assert(key_len <= sizeof(export_key));
     to_hex(out, out_len, export_key, key_len);
 
-    error_code = SM_DestroyKey(h_pipe, h_key);
+    error_code = key_destroy_key(h_pipe, h_key);
     if (error_code != YERR_SUCCESS) goto fail;
     h_key = NULL;
 
-    return YERR_SUCCESS;
+    return error_code;
 
 fail:
-    if (h_key != NULL) SM_DestroyPublicKey(h_pipe, h_key);
+    if (h_key != NULL) key_destroy_key(h_pipe, h_key);
     return error_code;
 }
 
@@ -124,6 +152,8 @@ fail:
     if (h_prikey != NULL) SM_DestroyPrivateKey(h_pipe, h_prikey);
     return error_code;
 }
+
+
 
 static void init_key_attr_sm4() {
     memset(&g_key_attr_sm4,  0, sizeof(SM_KEY_ATTRIBUTE));
