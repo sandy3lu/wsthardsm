@@ -17,10 +17,20 @@ message KeyPair {
     string private_key = 2;
 }
 
+message DeviceStatus {
+    int index = 1;
+    bool opened = 2;
+    bool logged_in = 3;
+    int pipes_count = 4;
+    int free_pipes_count = 5;
+    int secret_key_count = 6;
+    int public_key_count = 7;
+    int private_key_count = 8;
+}
+
 message Response {
     int32 code = 1;
     string msg = 2;
-    string details = 3;
     oneof data {    // "oneof" is just like "union" in C Language
         BoolValue bool_value = 4;
         IntValue int_value = 5;

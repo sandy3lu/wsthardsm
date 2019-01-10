@@ -8,7 +8,7 @@ extern "C" {
 #define MAX_RANDOM_LEN    1024
 
 
-int crypto_init_context();
+int init_crypto_context();
 
 int crypto_digest(SM_PIPE_HANDLE h_pipe, const char *data, int data_len, char *out, int out_len);
 

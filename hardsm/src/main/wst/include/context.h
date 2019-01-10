@@ -26,7 +26,11 @@ int init();
 
 /* 清理函数库，释放该函数库所占用的一切资源，应该在不需要使用函数库时调用本函数，
  * 已确保加密卡硬件资源得到正确释放，否者加密卡可能陷入不一致的状态 */
-int finit();
+int final();
+
+/* 打印所有的上下文信息，verbose = true 时打印详细信息，否者打印简略信息
+ * 打印内容会比较多，因此确保 buf 有足够大的空间，否者可能段错误，一般不应小于 1024 * 32 字节 */
+void ctx_print_context(char *buf, int buf_len, bool verbose);
 
 /* 统计检测到的加密卡数量 */
 int ctx_device_count();
@@ -37,37 +41,24 @@ int ctx_device_count();
  * 2. 非独占，一个进程打开某个加密卡的情况下，其他进程也能独立打开，并且谁打开谁负责关闭 */
 int ctx_open_device(int index);
 
-/* 关闭指定索引的加密卡设备，无论加密卡是否已关闭 */
-int ctx_close_device(int index);
-
 /* 一次性关闭该进程使用的所有加密卡 */
-int ctx_close_all_devices();
+int ctx_close_device();
 
 /* 实时获取指定加密卡的状态信息 */
-int ctx_get_device_status(int index, DeviceStatus *device_status);
-
-/* 实时获取所有加密卡的状态信息 */
-DeviceStatuses ctx_get_device_statuses();
+DeviceStatus ctx_get_device_status(int index);
 
 /* 加密卡设备自检 */
 int ctx_check_device(int index);
 
-/* 打印所有的上下文信息，verbose = true 时打印详细信息，否者打印简略信息
- * 打印内容会比较多，因此确保 buf 有足够大的空间，否者可能段错误，一般不应小于 1024 * 32 字节 */
-void ctx_print_context(char *buf, int buf_len, bool verbose);
-
 /* 打开某个加密卡上的所有安全通道，比如 westone B 卡有 32 个通道，
  * 一次性打开所有通道，是为了上层以多线程方式调用加密卡，充分利用加密卡资源，提升性能。
  * 该函数也是幂等的，可重复调用，无副作用。*/
-int ctx_open_pipes(int index);
+int ctx_open_all_pipes(int index);
 
 /* 关闭某个加密卡上的所有安全通道，满足幂等性 */
-int ctx_close_pipes(int index);
+int ctx_close_all_pipes(int index);
 
-/* 关闭某个加密卡上的所有安全通道，满足幂等性，实现方式与 ctx_close_pipe 不同。
- * ctx_close_pipe 是手动一个一个关闭通道的，而本函数是调用加密卡方法一次性关闭的。
- * 推荐使用本函数而非 ctx_close_pipe。*/
-int ctx_close_all_pipe(int index);
+int ctx_destroy_keys(int index);
 
 /* 登录某个加密卡, 8 <= len(pin_code) <= 256，满足幂等性 */
 int ctx_login(int index, const char *pin_code);

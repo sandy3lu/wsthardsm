@@ -21,7 +21,7 @@ static int make_blob_key(SM_BLOB_KEY *blob_key, PSM_KEY_HANDLE ph_key);
 static int make_crypt_algorithm(SM_ALGORITHM *algorithm, const char *hex_iv);
 
 
-int crypto_init_context() {
+int init_crypto_context() {
     init_hash_algorithm();
     init_mac_algorithm();
     init_sign_algorithm();
