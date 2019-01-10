@@ -30,6 +30,14 @@ int crypto_crypt_update(SM_PIPE_HANDLE h_pipe, bool encrypt, const char *data, i
 
 int crypto_crypt_final(SM_PIPE_HANDLE h_pipe, bool encrypt, const char *data, int data_len, char *out, int *out_len);
 
+int crypto_ecc_sign(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key,
+                    const char *hex_data, char *hex_out, int hex_out_len);
+
+int crypto_ecc_verify(SM_PIPE_HANDLE h_pipe, const char *hex_key, int *verify_result,
+                      const char *hex_data, char *hex_signature);
+
+int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *verify_result,
+                   const char *hex_data, char *hex_signature);
 
 #ifdef __cplusplus
 }

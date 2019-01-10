@@ -23,6 +23,11 @@ int key_import_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool protect
 
 int key_destroy_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_key);
 
+int key_import_private_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key,
+                           const char *hex_key, PSM_KEY_HANDLE ph_key);
+
+int key_destroy_private_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_key);
+
 
 #ifdef __cplusplus
 }

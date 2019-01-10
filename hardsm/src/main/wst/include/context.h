@@ -131,6 +131,9 @@ int ctx_decrypt_init(int device_index, int pipe_index, const char *hex_secret_ke
 int ctx_decrypt_update(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
 int ctx_decrypt_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
 
+int ctx_ecc_sign(int device_index, int pipe_index, const char *hex_key,
+                 const char *hex_data, char *hex_out, int hex_out_len);
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* 以下为模块内部调用函数 */

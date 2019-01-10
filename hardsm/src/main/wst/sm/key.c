@@ -42,8 +42,8 @@ int key_close_config_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_Key) {
 }
 
 int key_import_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool protect,
-                      const char *hex_secret_key, PSM_KEY_HANDLE ph_key) {
-    if (strlen(hex_secret_key) > SMMA_ALG35_BLOCK_LEN * 2) return KEY_TOO_LONG;
+                   const char *hex_secret_key, PSM_KEY_HANDLE ph_key) {
+    if (strlen(hex_secret_key) != SMMA_ALG35_BLOCK_LEN * 2) return KEY_LENGTH_INVALID;
 
     char secret_key[SMMA_ALG35_BLOCK_LEN] = {0};
     int key_len = 0;
@@ -63,7 +63,7 @@ int key_import_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool protect
     if (error_code != YERR_SUCCESS) return error_code;
     *ph_key = h_key;
 
-    return YERR_SUCCESS;
+    return error_code;
 }
 
 int key_destroy_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_key) {
@@ -153,6 +153,27 @@ fail:
     return error_code;
 }
 
+int key_import_private_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key,
+                           const char *hex_key, PSM_KEY_HANDLE ph_key) {
+    if (strlen(hex_key) != SMMA_ECC_FP_256_PRIVATE_KEY_LEN * 2) return KEY_LENGTH_INVALID;
+
+    char private_key[SMMA_ECC_FP_256_PRIVATE_KEY_LEN] = {0};
+    int prikey_len = 0;
+    from_hex(private_key, &prikey_len, hex_key);
+    assert(prikey_len <= sizeof(private_key));
+
+    SM_KEY_HANDLE h_key = NULL;
+    int error_code = SM_ImportPrivateKey(h_pipe, (PSM_BYTE)private_key, prikey_len,
+                                         h_auth_key, &g_export_algorithm, &g_key_attr_sm2private, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    *ph_key = h_key;
+
+    return error_code;
+}
+
+int key_destroy_private_key(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_key) {
+    return SM_DestroyPrivateKey(h_pipe, h_key);
+}
 
 
 static void init_key_attr_sm4() {

@@ -9,9 +9,13 @@
 static SM_BYTE g_byiv[SMMA_ALG34_IV_LEN];
 static SM_ALGORITHM g_hash_algorithm;
 static SM_ALGORITHM g_mac_algorithm;
+static SM_ALGORITHM g_sign_algorithm;
+static SM_ALGORITHM g_verify_algorithm;
 
 static void init_mac_algorithm();
 static void init_hash_algorithm();
+static void init_sign_algorithm();
+static void init_verify_algorithm();
 static int is_length_valid(int plain_data_len, int secret_data_len);
 static int make_blob_key(SM_BLOB_KEY *blob_key, PSM_KEY_HANDLE ph_key);
 static int make_crypt_algorithm(SM_ALGORITHM *algorithm, const char *hex_iv);
@@ -20,7 +24,8 @@ static int make_crypt_algorithm(SM_ALGORITHM *algorithm, const char *hex_iv);
 int crypto_init_context() {
     init_hash_algorithm();
     init_mac_algorithm();
-
+    init_sign_algorithm();
+    init_verify_algorithm();
     return YERR_SUCCESS;
 }
 
@@ -145,6 +150,75 @@ int crypto_crypt_final(SM_PIPE_HANDLE h_pipe, bool encrypt, const char *data, in
     return YERR_SUCCESS;
 }
 
+int crypto_ecc_sign(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key,
+                    const char *hex_data, char *hex_out, int hex_out_len) {
+    int hex_data_len = strlen(hex_data);
+    if (hex_data_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_data_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
+        return BLOCK_LENGTH_INVALID;
+    }
+    if (hex_out_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_out_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
+        return BLOCK_LENGTH_INVALID;
+    }
+
+    SM_BLOB_KEY blob_key;
+    int error_code = make_blob_key(&blob_key, ph_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    char data[SMMA_ECC_FP_256_SIG_MAX_LEN] = {0};
+    int data_len = 0;
+    from_hex(data, &data_len, hex_data);
+    assert(data_len <= sizeof(data));
+
+    char out[SMMA_ECC_FP_256_SIG_MAX_LEN] = {0};
+    int out_len = sizeof(out);
+
+    error_code = SM_ECCSignature(h_pipe, &blob_key, &g_sign_algorithm,
+                                 (PSM_BYTE)data, (SM_UINT)data_len,
+                                 (PSM_BYTE)out, (PSM_UINT)&out_len);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    to_hex(hex_out, hex_out_len, out, out_len);
+    return YERR_SUCCESS;
+}
+
+int crypto_ecc_verify(SM_PIPE_HANDLE h_pipe, const char *hex_key, int *verify_result,
+                      const char *hex_data, char *hex_signature) {
+    int hex_data_len = strlen(hex_data);
+    int hex_signature_len = strlen(hex_signature);
+    if (strlen(hex_key) != SMMA_ECC_FP_256_PUBLIC_KEY_LEN * 2) return KEY_LENGTH_INVALID;
+    if (hex_data_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_data_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
+        return BLOCK_LENGTH_INVALID;
+    }
+    if (hex_signature_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_signature_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
+        return BLOCK_LENGTH_INVALID;
+    }
+
+    char public_key[SMMA_ECC_FP_256_PUBLIC_KEY_LEN] = {0};
+    int pubkey_len = 0;
+    from_hex(public_key, &pubkey_len,  hex_key);
+    assert(pubkey_len <= sizeof(public_key));
+
+    char data[SMMA_ECC_FP_256_SIG_MAX_LEN] = {0};
+    int data_len = 0;
+    from_hex(data, &data_len, hex_data);
+    assert(data_len <= sizeof(data));
+
+    char signature[SMMA_ECC_FP_256_SIG_MAX_LEN] = {0};
+    int signature_len = 0;
+    from_hex(signature, &signature_len, hex_signature);
+    assert(signature_len <= sizeof(signature));
+
+    SM_BLOB_KEY blob_key;
+    memset(&blob_key, 0, sizeof(SM_BLOB_KEY));
+    blob_key.pbyData = (PSM_BYTE)public_key;
+    blob_key.uiDataLen = (SM_UINT)pubkey_len;
+
+    int error_code = SM_ECCVerify(h_pipe, &blob_key, &g_verify_algorithm,
+                                  (PSM_BYTE)data, (SM_UINT)data_len,
+                                  (PSM_BYTE)signature, (SM_UINT)signature_len);
+    *verify_result = error_code;
+    return YERR_SUCCESS;
+}
 
 static void init_hash_algorithm() {
     memset(&g_hash_algorithm, 0, sizeof(SM_ALGORITHM));
@@ -158,6 +232,22 @@ static void init_mac_algorithm() {
     g_mac_algorithm.AlgoType = SMM_ALG35_MAC;
     g_mac_algorithm.pParameter = g_byiv;
     g_mac_algorithm.uiParameterLen = SMMA_ALG34_IV_LEN;
+}
+
+static void init_sign_algorithm() {
+    memset(&g_sign_algorithm, 0, sizeof(SM_ALGORITHM));
+    g_sign_algorithm.AlgoType = SMM_ECC_FP_SIGN;
+    g_sign_algorithm.pParameter = SM_NULL;
+    g_sign_algorithm.uiParameterLen = 0;
+    g_sign_algorithm.uiReserve = SMMA_ECC_FP_256_MODULUS_BITS;
+}
+
+static void init_verify_algorithm() {
+    memset(&g_verify_algorithm, 0, sizeof(SM_ALGORITHM));
+    g_verify_algorithm.AlgoType = SMM_ECC_FP_VERIFY;
+    g_verify_algorithm.pParameter = SM_NULL;
+    g_verify_algorithm.uiParameterLen = 0;
+    g_verify_algorithm.uiReserve = SMMA_ECC_FP_256_MODULUS_BITS;
 }
 
 static int is_length_valid(int plain_data_len, int secret_data_len) {
