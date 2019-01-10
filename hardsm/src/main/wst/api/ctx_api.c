@@ -1,0 +1,9 @@
+#include <stdio.h>
+#include <assert.h>
+#include "../proto/protobuf-c.h"
+#include "../proto/sm.pb-c.h"
+#include "../include/sm_api.h"
+#include "../include/util.h"
+#include "../include/data.h"
+#include "../include/device.h"
+#include "../include/context.h"

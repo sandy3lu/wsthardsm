@@ -140,7 +140,6 @@ int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *v
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* 以下为模块内部调用函数 */
 int print_device_context(DeviceContext *device_context, char *buf);
 int print_statistics(CryptoContext *crypto_context, char *buf);
 int print_device_status(DeviceStatus *device_status, char *buf);

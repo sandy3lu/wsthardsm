@@ -19,6 +19,7 @@ typedef struct _BoolValue BoolValue;
 typedef struct _IntValue IntValue;
 typedef struct _StrValue StrValue;
 typedef struct _KeyPair KeyPair;
+typedef struct _DevStatus DevStatus;
 typedef struct _Response Response;
 
 
@@ -70,12 +71,38 @@ struct  _KeyPair
     , NULL, NULL }
 
 
+struct  _DevStatus
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_index;
+  int32_t index;
+  protobuf_c_boolean has_opened;
+  protobuf_c_boolean opened;
+  protobuf_c_boolean has_logged_in;
+  protobuf_c_boolean logged_in;
+  protobuf_c_boolean has_pipes_count;
+  int32_t pipes_count;
+  protobuf_c_boolean has_free_pipes_count;
+  int32_t free_pipes_count;
+  protobuf_c_boolean has_secret_key_count;
+  int32_t secret_key_count;
+  protobuf_c_boolean has_public_key_count;
+  int32_t public_key_count;
+  protobuf_c_boolean has_private_key_count;
+  int32_t private_key_count;
+};
+#define DEV_STATUS__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&dev_status__descriptor) \
+    , 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0 }
+
+
 typedef enum {
   RESPONSE__DATA__NOT_SET = 0,
   RESPONSE__DATA_BOOL_VALUE = 4,
   RESPONSE__DATA_INT_VALUE = 5,
   RESPONSE__DATA_STR_VALUE = 6,
   RESPONSE__DATA_KEY_PAIR = 7,
+  RESPONSE__DATA_DEVICE_STATUS = 8,
 } Response__DataCase;
 
 struct  _Response
@@ -84,18 +111,18 @@ struct  _Response
   protobuf_c_boolean has_code;
   int32_t code;
   char *msg;
-  char *details;
   Response__DataCase data_case;
   union {
     BoolValue *bool_value;
     IntValue *int_value;
     StrValue *str_value;
     KeyPair *key_pair;
+    DevStatus *device_status;
   };
 };
 #define RESPONSE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&response__descriptor) \
-    , 0,0, NULL, NULL, RESPONSE__DATA__NOT_SET, {0} }
+    , 0,0, NULL, RESPONSE__DATA__NOT_SET, {0} }
 
 
 /* BoolValue methods */
@@ -174,6 +201,25 @@ KeyPair *
 void   key_pair__free_unpacked
                      (KeyPair *message,
                       ProtobufCAllocator *allocator);
+/* DevStatus methods */
+void   dev_status__init
+                     (DevStatus         *message);
+size_t dev_status__get_packed_size
+                     (const DevStatus   *message);
+size_t dev_status__pack
+                     (const DevStatus   *message,
+                      uint8_t             *out);
+size_t dev_status__pack_to_buffer
+                     (const DevStatus   *message,
+                      ProtobufCBuffer     *buffer);
+DevStatus *
+       dev_status__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   dev_status__free_unpacked
+                     (DevStatus *message,
+                      ProtobufCAllocator *allocator);
 /* Response methods */
 void   response__init
                      (Response         *message);
@@ -207,6 +253,9 @@ typedef void (*StrValue_Closure)
 typedef void (*KeyPair_Closure)
                  (const KeyPair *message,
                   void *closure_data);
+typedef void (*DevStatus_Closure)
+                 (const DevStatus *message,
+                  void *closure_data);
 typedef void (*Response_Closure)
                  (const Response *message,
                   void *closure_data);
@@ -220,6 +269,7 @@ extern const ProtobufCMessageDescriptor bool_value__descriptor;
 extern const ProtobufCMessageDescriptor int_value__descriptor;
 extern const ProtobufCMessageDescriptor str_value__descriptor;
 extern const ProtobufCMessageDescriptor key_pair__descriptor;
+extern const ProtobufCMessageDescriptor dev_status__descriptor;
 extern const ProtobufCMessageDescriptor response__descriptor;
 
 PROTOBUF_C__END_DECLS

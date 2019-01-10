@@ -17,15 +17,15 @@ message KeyPair {
     string private_key = 2;
 }
 
-message DeviceStatus {
-    int index = 1;
+message DevStatus {
+    int32 index = 1;
     bool opened = 2;
     bool logged_in = 3;
-    int pipes_count = 4;
-    int free_pipes_count = 5;
-    int secret_key_count = 6;
-    int public_key_count = 7;
-    int private_key_count = 8;
+    int32 pipes_count = 4;
+    int32 free_pipes_count = 5;
+    int32 secret_key_count = 6;
+    int32 public_key_count = 7;
+    int32 private_key_count = 8;
 }
 
 message Response {
@@ -36,5 +36,6 @@ message Response {
         IntValue int_value = 5;
         StrValue str_value = 6;
         KeyPair key_pair = 7;
+        DevStatus device_status = 8;
     }
 }

@@ -179,6 +179,49 @@ void   key_pair__free_unpacked
   assert(message->base.descriptor == &key_pair__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   dev_status__init
+                     (DevStatus         *message)
+{
+  static DevStatus init_value = DEV_STATUS__INIT;
+  *message = init_value;
+}
+size_t dev_status__get_packed_size
+                     (const DevStatus *message)
+{
+  assert(message->base.descriptor == &dev_status__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t dev_status__pack
+                     (const DevStatus *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &dev_status__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t dev_status__pack_to_buffer
+                     (const DevStatus *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &dev_status__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+DevStatus *
+       dev_status__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (DevStatus *)
+     protobuf_c_message_unpack (&dev_status__descriptor,
+                                allocator, len, data);
+}
+void   dev_status__free_unpacked
+                     (DevStatus *message,
+                      ProtobufCAllocator *allocator)
+{
+  assert(message->base.descriptor == &dev_status__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   response__init
                      (Response         *message)
 {
@@ -387,6 +430,135 @@ const ProtobufCMessageDescriptor key_pair__descriptor =
   (ProtobufCMessageInit) key_pair__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCFieldDescriptor dev_status__field_descriptors[8] =
+{
+  {
+    "index",
+    1,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(DevStatus, has_index),
+    offsetof(DevStatus, index),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "opened",
+    2,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_BOOL,
+    offsetof(DevStatus, has_opened),
+    offsetof(DevStatus, opened),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "logged_in",
+    3,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_BOOL,
+    offsetof(DevStatus, has_logged_in),
+    offsetof(DevStatus, logged_in),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "pipes_count",
+    4,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(DevStatus, has_pipes_count),
+    offsetof(DevStatus, pipes_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "free_pipes_count",
+    5,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(DevStatus, has_free_pipes_count),
+    offsetof(DevStatus, free_pipes_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "secret_key_count",
+    6,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(DevStatus, has_secret_key_count),
+    offsetof(DevStatus, secret_key_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "public_key_count",
+    7,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(DevStatus, has_public_key_count),
+    offsetof(DevStatus, public_key_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "private_key_count",
+    8,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(DevStatus, has_private_key_count),
+    offsetof(DevStatus, private_key_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned dev_status__field_indices_by_name[] = {
+  4,   /* field[4] = free_pipes_count */
+  0,   /* field[0] = index */
+  2,   /* field[2] = logged_in */
+  1,   /* field[1] = opened */
+  3,   /* field[3] = pipes_count */
+  7,   /* field[7] = private_key_count */
+  6,   /* field[6] = public_key_count */
+  5,   /* field[5] = secret_key_count */
+};
+static const ProtobufCIntRange dev_status__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 8 }
+};
+const ProtobufCMessageDescriptor dev_status__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "DevStatus",
+  "DevStatus",
+  "DevStatus",
+  "",
+  sizeof(DevStatus),
+  8,
+  dev_status__field_descriptors,
+  dev_status__field_indices_by_name,
+  1,  dev_status__number_ranges,
+  (ProtobufCMessageInit) dev_status__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCFieldDescriptor response__field_descriptors[7] =
 {
   {
@@ -408,18 +580,6 @@ static const ProtobufCFieldDescriptor response__field_descriptors[7] =
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
     offsetof(Response, msg),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "details",
-    3,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(Response, details),
     NULL,
     NULL,
     0,             /* flags */
@@ -473,19 +633,32 @@ static const ProtobufCFieldDescriptor response__field_descriptors[7] =
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "device_status",
+    8,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Response, data_case),
+    offsetof(Response, device_status),
+    &dev_status__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned response__field_indices_by_name[] = {
-  3,   /* field[3] = bool_value */
+  2,   /* field[2] = bool_value */
   0,   /* field[0] = code */
-  2,   /* field[2] = details */
-  4,   /* field[4] = int_value */
-  6,   /* field[6] = key_pair */
+  6,   /* field[6] = device_status */
+  3,   /* field[3] = int_value */
+  5,   /* field[5] = key_pair */
   1,   /* field[1] = msg */
-  5,   /* field[5] = str_value */
+  4,   /* field[4] = str_value */
 };
-static const ProtobufCIntRange response__number_ranges[1 + 1] =
+static const ProtobufCIntRange response__number_ranges[2 + 1] =
 {
   { 1, 0 },
+  { 4, 2 },
   { 0, 7 }
 };
 const ProtobufCMessageDescriptor response__descriptor =
@@ -499,7 +672,7 @@ const ProtobufCMessageDescriptor response__descriptor =
   7,
   response__field_descriptors,
   response__field_indices_by_name,
-  1,  response__number_ranges,
+  2,  response__number_ranges,
   (ProtobufCMessageInit) response__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
