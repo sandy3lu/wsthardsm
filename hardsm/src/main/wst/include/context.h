@@ -120,6 +120,17 @@ int ctx_encrypt(int device_index, int pipe_index, const char *hex_secret_key,
 int ctx_decrypt(int device_index, int pipe_index, const char *hex_secret_key,
                 const char *hex_iv, const char *data, int data_len, char *out, int *out_len);
 
+/* 分步加解密
+ * 1. init 后，可以任意多次 update，最后再执行 final
+ * 2. init 后，可以任意次重复步骤 1
+ * 3. 在同一通道上重复 init，将会覆盖之前的 init */
+int ctx_encrypt_init(int device_index, int pipe_index, const char *hex_secret_key, const char *hex_iv);
+int ctx_encrypt_update(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
+int ctx_encrypt_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
+int ctx_decrypt_init(int device_index, int pipe_index, const char *hex_secret_key, const char *hex_iv);
+int ctx_decrypt_update(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
+int ctx_decrypt_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* 以下为模块内部调用函数 */

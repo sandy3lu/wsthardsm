@@ -96,10 +96,104 @@ static void test_decrypt() {
     }
 }
 
+static void test_section_encrypt() {
+    const char *data = origin_data;
+    const char *hex_iv = NULL;
+    const char *hex_secret_key = "9353b0995d93c0b7f470deec26112172";
+    char out[1024] = {0};
+    int out_len = 0;
+
+    int error_code = ctx_encrypt_init(0, 0, hex_secret_key, hex_iv);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    const char *cursor = data;
+    char *out_cursor = out;
+    int out_cursor_len = 0;
+    while (cursor + 16 < data + strlen(data)) {
+        out_cursor_len = 16;
+        error_code = ctx_encrypt_update(0, 0, cursor, 16, out_cursor, &out_cursor_len);
+        if (error_code != YERR_SUCCESS) {
+            print_error(error_code);
+            return;
+        }
+        cursor += 16;
+        out_cursor += out_cursor_len;
+        out_len += out_cursor_len;
+    }
+    out_cursor_len = 128;
+    error_code = ctx_encrypt_final(0, 0, cursor, strlen(cursor), out_cursor, &out_cursor_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+    out_cursor += out_cursor_len;
+    out_len += out_cursor_len;
+
+    char hex_out[1024] = {0};
+    to_hex(hex_out, sizeof(hex_out), out, out_len);
+    if (0 != strcmp(hex_out, encrypt_result)) {
+        printf("encrypt error\n");
+    } else {
+        printf("encrypt success\n");
+    }
+}
+
+static void test_section_decrypt() {
+    const char *hex_data = encrypt_result;
+    const char *hex_iv = NULL;
+    const char *hex_secret_key = "9353b0995d93c0b7f470deec26112172";
+    char data[1024] = {0};
+    int data_len = sizeof(data);
+    char out[1024] = {0};
+    int out_len = 0;
+
+    from_hex(data, &data_len, hex_data);
+
+    int error_code = ctx_decrypt_init(0, 0, hex_secret_key, hex_iv);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    const char *cursor = data;
+    char *out_cursor = out;
+    int out_cursor_len = 0;
+    while (cursor + 16 < data + data_len) {
+        out_cursor_len = 16;
+        error_code = ctx_decrypt_update(0, 0, cursor, 16, out_cursor, &out_cursor_len);
+        if (error_code != YERR_SUCCESS) {
+            print_error(error_code);
+            return;
+        }
+        cursor += 16;
+        out_cursor += out_cursor_len;
+        out_len += out_cursor_len;
+    }
+    out_cursor_len = 128;
+    error_code = ctx_decrypt_final(0, 0, cursor, strlen(cursor), out_cursor, &out_cursor_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+    out_cursor += out_cursor_len;
+    out_len += out_cursor_len;
+
+    if (0 != strcmp(out, origin_data)) {
+        printf("decrypt error\n");
+    } else {
+        printf("decrypt success\n");
+    }
+}
+
 void test_crypto() {
     test_digest();
     test_digest_section();
     test_random();
     test_encrypt();
     test_decrypt();
+    test_section_encrypt();
+    test_section_decrypt();
 }

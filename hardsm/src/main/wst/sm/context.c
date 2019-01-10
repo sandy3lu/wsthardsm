@@ -17,6 +17,8 @@ static int check_device_index(int index);
 static int check_context_status(int device_index);
 static int hash_index(int index, int count);
 static int get_pipe_authkey(int device_index, int pipe_index, PSM_PIPE_HANDLE ph_pipe, PSM_KEY_HANDLE ph_auth_key);
+static int get_secret_key(int device_index, int pipe_index, SM_KEY_HANDLE *h_key);
+static int set_secret_key(int device_index, int pipe_index, SM_KEY_HANDLE h_key);
 
 
 void ctx_print_context(char *buf, int buf_len, bool verbose) {
@@ -288,7 +290,7 @@ int ctx_encrypt(int device_index, int pipe_index, const char *hex_secret_key,
     SM_KEY_HANDLE h_key = NULL;
     error_code = key_import_key(h_pipe, h_auth_key, g_crypto_context.protect_key, hex_secret_key, &h_key);
     if (error_code != YERR_SUCCESS) return error_code;
-    error_code = crypto_crypt(h_pipe, h_auth_key, h_key, encrypt, hex_iv, data, data_len, out, out_len);
+    error_code = crypto_crypt(h_pipe, &h_key, encrypt, hex_iv, data, data_len, out, out_len);
     key_destroy_key(h_pipe, h_key);
 
     return error_code;
@@ -306,10 +308,100 @@ int ctx_decrypt(int device_index, int pipe_index, const char *hex_secret_key,
     SM_KEY_HANDLE h_key = NULL;
     error_code = key_import_key(h_pipe, h_auth_key, g_crypto_context.protect_key, hex_secret_key, &h_key);
     if (error_code != YERR_SUCCESS) return error_code;
-    error_code = crypto_crypt(h_pipe, h_auth_key, h_key, encrypt, hex_iv, data, data_len, out, out_len);
+    error_code = crypto_crypt(h_pipe, &h_key, encrypt, hex_iv, data, data_len, out, out_len);
     key_destroy_key(h_pipe, h_key);
 
     return error_code;
+}
+
+int ctx_encrypt_init(int device_index, int pipe_index, const char *hex_secret_key, const char *hex_iv) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    SM_KEY_HANDLE h_key = NULL;
+    error_code = get_secret_key(device_index, pipe_index, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    if (NULL != h_key) {
+        error_code = key_destroy_key(h_pipe, h_key);
+    }
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    error_code = key_import_key(h_pipe, h_auth_key, g_crypto_context.protect_key, hex_secret_key, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    error_code = set_secret_key(device_index, pipe_index, h_key);
+
+    bool encrypt = true;
+    return crypto_crypt_init(h_pipe, &h_key, encrypt, hex_iv);
+}
+
+int ctx_encrypt_update(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    bool encrypt = true;
+    return crypto_crypt_update(h_pipe, encrypt, data, data_len, out, out_len);
+}
+
+int ctx_encrypt_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    bool encrypt = true;
+    return crypto_crypt_final(h_pipe, encrypt, data, data_len, out, out_len);
+}
+
+int ctx_decrypt_init(int device_index, int pipe_index, const char *hex_secret_key, const char *hex_iv) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    SM_KEY_HANDLE h_key = NULL;
+    error_code = get_secret_key(device_index, pipe_index, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    if (NULL != h_key) {
+        error_code = key_destroy_key(h_pipe, h_key);
+    }
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    error_code = key_import_key(h_pipe, h_auth_key, g_crypto_context.protect_key, hex_secret_key, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    error_code = set_secret_key(device_index, pipe_index, h_key);
+
+    bool encrypt = false;
+    return crypto_crypt_init(h_pipe, &h_key, encrypt, hex_iv);
+}
+
+int ctx_decrypt_update(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    bool encrypt = false;
+    return crypto_crypt_update(h_pipe, encrypt, data, data_len, out, out_len);
+}
+
+int ctx_decrypt_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    bool encrypt = false;
+    return crypto_crypt_final(h_pipe, encrypt, data, data_len, out, out_len);
 }
 
 
@@ -384,6 +476,36 @@ static int get_pipe_authkey(int device_index, int pipe_index, PSM_PIPE_HANDLE ph
     SM_PIPE_HANDLE h_pipe = device_context->h_pipes[pipe_index];
     *ph_pipe = h_pipe;
     *ph_auth_key = device_context->h_auth_key;
+
+    return error_code;
+}
+
+static int get_secret_key(int device_index, int pipe_index, SM_KEY_HANDLE *h_key) {
+    int error_code = YERR_SUCCESS;
+
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
+
+    *h_key = device_context->h_keys[pipe_index];
+
+    return error_code;
+}
+
+static int set_secret_key(int device_index, int pipe_index, SM_KEY_HANDLE h_key) {
+    int error_code = YERR_SUCCESS;
+
+    device_index = hash_index(device_index, g_crypto_context.device_count);
+    error_code = check_context_status(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    pipe_index = hash_index(pipe_index, device_context->pipes_len);
+
+    device_context->h_keys[pipe_index] = h_key;
 
     return error_code;
 }
