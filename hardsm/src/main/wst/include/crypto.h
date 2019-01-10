@@ -36,8 +36,6 @@ int crypto_ecc_sign(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key,
 int crypto_ecc_verify(SM_PIPE_HANDLE h_pipe, const char *hex_key, int *verify_result,
                       const char *hex_data, char *hex_signature);
 
-int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *verify_result,
-                   const char *hex_data, char *hex_signature);
 
 #ifdef __cplusplus
 }

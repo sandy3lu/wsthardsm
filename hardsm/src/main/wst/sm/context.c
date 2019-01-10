@@ -432,6 +432,7 @@ int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *v
     return crypto_ecc_verify(h_pipe, hex_key, verify_result, hex_data, hex_signature);
 }
 
+
 static int init_statistics() {
     int error_code = YERR_SUCCESS;
     CryptoContext *crypto_context = &(g_crypto_context);

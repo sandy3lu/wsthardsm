@@ -131,8 +131,21 @@ int ctx_decrypt_init(int device_index, int pipe_index, const char *hex_secret_ke
 int ctx_decrypt_update(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
 int ctx_decrypt_final(int device_index, int pipe_index, const char *data, int data_len, char *out, int *out_len);
 
+/* 数字签名接口
+ * hex_key: 私钥的 16 进制编码, 64 字符长
+ * hex_data: 待签名数据的 16 进制编码
+ * hex_out: 输出参数，存放 16 进制编码的签名值
+ * hex_out_len: 指明 hex_out 缓存区的长度，不能小于 129 字符 (64 * 2 + 1) */
 int ctx_ecc_sign(int device_index, int pipe_index, const char *hex_key,
                  const char *hex_data, char *hex_out, int hex_out_len);
+
+/* 数字签名验证接口
+ * hex_key: 公钥的 16 进制编码, 128 字符长
+ * verify_result: 输出参数，存放验证结果，0 为验证正确
+ * hex_data: 原文数据的 16 进制编码
+ * hex_signature: 签名值的 16 进制编码，不能小于 128 字符 */
+int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *verify_result,
+                   const char *hex_data, char *hex_signature);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

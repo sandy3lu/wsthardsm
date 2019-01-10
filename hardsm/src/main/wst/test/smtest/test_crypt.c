@@ -188,6 +188,32 @@ static void test_section_decrypt() {
     }
 }
 
+static void test_sign_verify() {
+    const char *hex_private = "559ba1bfa6cdb845388f0fa07cc714376840fc92cf777ee264673fdd8cf99ce5";
+    const char *hex_public = "f8b4732c9dac6e007f1615bdb52344050046df7c4d6ea14c4cd9912aea82c593b90bb3a6927b681bdfe3590f0edef1df10350fb03070cd4dcdaec38b1bb2366b";
+    const char *data = origin_data;
+
+    char signature[130] = {0};
+    int signature_len = sizeof(signature);
+
+    int error_code = ctx_ecc_sign(0, 0, hex_private, data, signature, signature_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    int verify_result = 0;
+    error_code = ctx_ecc_verify(0, 0, hex_public, &verify_result, data, signature);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    if (0 != verify_result) {
+        print_error(verify_result);
+    }
+}
+
 void test_crypto() {
     test_digest();
     test_digest_section();
@@ -196,4 +222,5 @@ void test_crypto() {
     test_decrypt();
     test_section_encrypt();
     test_section_decrypt();
+    test_sign_verify();
 }

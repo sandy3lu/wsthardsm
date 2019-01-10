@@ -22,6 +22,9 @@ void init_error_string() {
     MSGS[BUFSIZE_TOO_SMALL] = "buf size too small";
     MSGS[NEED_LOGIN] = "need login";
     MSGS[RANDOM_LEN_OUTOF_BOUND] = "random length out of bound";
+    MSGS[KEY_LENGTH_INVALID] = "key length invalid";
+    MSGS[IV_LENGTH_INVALID] = "iv length invalid";
+    MSGS[BLOCK_LENGTH_INVALID] = "block length invalid";
 }
 
 char *get_error_string(int code) {

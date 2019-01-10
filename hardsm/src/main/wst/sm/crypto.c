@@ -156,8 +156,8 @@ int crypto_ecc_sign(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key,
     if (hex_data_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_data_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
         return BLOCK_LENGTH_INVALID;
     }
-    if (hex_out_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_out_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
-        return BLOCK_LENGTH_INVALID;
+    if (hex_out_len <= SMMA_ECC_FP_256_SIG_MAX_LEN * 2) {
+        return BUFSIZE_TOO_SMALL;
     }
 
     SM_BLOB_KEY blob_key;
@@ -176,7 +176,6 @@ int crypto_ecc_sign(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key,
                                  (PSM_BYTE)data, (SM_UINT)data_len,
                                  (PSM_BYTE)out, (PSM_UINT)&out_len);
     if (error_code != YERR_SUCCESS) return error_code;
-
     to_hex(hex_out, hex_out_len, out, out_len);
     return YERR_SUCCESS;
 }
@@ -189,7 +188,7 @@ int crypto_ecc_verify(SM_PIPE_HANDLE h_pipe, const char *hex_key, int *verify_re
     if (hex_data_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_data_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
         return BLOCK_LENGTH_INVALID;
     }
-    if (hex_signature_len / 2 < SMMA_ECC_FP_256_SIG_MIN_LEN || hex_signature_len / 2 > SMMA_ECC_FP_256_SIG_MAX_LEN) {
+    if (hex_signature_len != SMMA_ECC_FP_256_SIG_VALLEN * 2) {
         return BLOCK_LENGTH_INVALID;
     }
 
@@ -203,7 +202,7 @@ int crypto_ecc_verify(SM_PIPE_HANDLE h_pipe, const char *hex_key, int *verify_re
     from_hex(data, &data_len, hex_data);
     assert(data_len <= sizeof(data));
 
-    char signature[SMMA_ECC_FP_256_SIG_MAX_LEN] = {0};
+    char signature[SMMA_ECC_FP_256_SIG_VALLEN] = {0};
     int signature_len = 0;
     from_hex(signature, &signature_len, hex_signature);
     assert(signature_len <= sizeof(signature));
