@@ -74,17 +74,13 @@ int crypto_random(SM_PIPE_HANDLE h_pipe, char *out, int out_len) {
  * 1. import key
  * 2. encrypt
  * 3. destroy key */
-int crypto_crypt(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool encrypt, const char *hex_secret_key,
-                 bool protect, const char *hex_iv, const char *data, int data_len, char *out, int *out_len) {
+int crypto_crypt(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, SM_KEY_HANDLE h_key, bool encrypt,
+                 const char *hex_iv, const char *data, int data_len, char *out, int *out_len) {
     int error_code = is_length_valid(data_len, *out_len);
     if (error_code != YERR_SUCCESS) return error_code;
     if (NULL != hex_iv) {
         if (strlen(hex_iv) != SMMA_ALG35_BLOCK_LEN * 2) return IV_LENGTH_INVALID;
     }
-
-    SM_KEY_HANDLE h_key = NULL;
-    error_code = key_import_key(h_pipe, h_auth_key, protect, hex_secret_key, &h_key);
-    if (error_code != YERR_SUCCESS) return error_code;
 
     SM_BLOB_KEY blob_key;
     memset(&blob_key, 0, sizeof(SM_BLOB_KEY));
@@ -113,17 +109,72 @@ int crypto_crypt(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool encrypt, 
         error_code = SM_Decrypt(h_pipe, &blob_key, &algorithm, true, (PSM_BYTE)data,
                                 data_len, (PSM_BYTE)out, (PSM_UINT)out_len);
     }
-    if (error_code != YERR_SUCCESS) goto fail;
+    return error_code;
+}
 
-    error_code = key_destroy_key(h_pipe, h_key);
+int crypto_crypt_init(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool encrypt,
+                      const char *hex_secret_key, bool protect, const char *hex_iv) {
+    if (NULL != hex_iv) {
+        if (strlen(hex_iv) != SMMA_ALG35_BLOCK_LEN * 2) return IV_LENGTH_INVALID;
+    }
+
+    SM_KEY_HANDLE h_key = NULL;
+    int error_code = key_import_key(h_pipe, h_auth_key, protect, hex_secret_key, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    SM_BLOB_KEY blob_key;
+    memset(&blob_key, 0, sizeof(SM_BLOB_KEY));
+    blob_key.pbyData = (SM_BYTE*)&h_key;
+    blob_key.uiDataLen = sizeof(SM_KEY_HANDLE);
+
+    SM_ALGORITHM algorithm;
+    memset(&algorithm, 0, sizeof(SM_ALGORITHM));
+    if (NULL != hex_iv) {
+        char iv[SMMA_ALG35_BLOCK_LEN] = {0};
+        int iv_len = sizeof(iv);
+        from_hex(iv, &iv_len, hex_iv);
+        algorithm.AlgoType = SMM_ALG35_CBC;
+        algorithm.pParameter = iv;
+        algorithm.uiParameterLen = SMMA_ALG35_IV_LEN;
+    } else {
+        algorithm.AlgoType = SMM_ALG35_ECB;
+        algorithm.pParameter = NULL;
+        algorithm.uiParameterLen = 0;
+    }
+
+    if (encrypt) {
+        error_code = SM_EncryptInit(h_pipe, &blob_key, &algorithm);
+    } else {
+        error_code = SM_DecryptInit(h_pipe, &blob_key, &algorithm);
+    }
     if (error_code != YERR_SUCCESS) goto fail;
-    h_key = NULL;
 
     return error_code;
 
 fail:
     if (h_key != NULL) key_destroy_key(h_pipe, h_key);
     return error_code;
+}
+
+int crypto_crypt_update(SM_PIPE_HANDLE h_pipe, bool encrypt, const char *data, int data_len, char *out, int *out_len) {
+    if (data_len != SMMA_ALG35_BLOCK_LEN) return BLOCK_LENGTH_INVALID;
+    if (*out_len < data_len) return BUFSIZE_TOO_SMALL;
+
+    int error_code = YERR_SUCCESS;
+
+    if (encrypt) {
+        error_code = SM_EncryptUpdate(h_pipe, (PSM_BYTE)data, data_len, (PSM_BYTE)out, (PSM_UINT)out_len);
+    } else {
+        error_code = SM_DecryptUpdate(h_pipe, (PSM_BYTE)data, data_len, (PSM_BYTE)out, (PSM_UINT)out_len);
+    }
+
+    return error_code;
+}
+
+int crypto_crypt_final(SM_PIPE_HANDLE h_pipe, int h_key_index, bool encrypt,
+                       const char *data, int data_len, char *out, int *out_len) {
+    return YERR_SUCCESS;
+
 }
 
 static void init_hash_algorithm() {

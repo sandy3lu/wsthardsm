@@ -285,8 +285,13 @@ int ctx_encrypt(int device_index, int pipe_index, const char *hex_secret_key,
     if (error_code != YERR_SUCCESS) return error_code;
 
     bool encrypt = true;
-    return crypto_crypt(h_pipe, h_auth_key, encrypt, hex_secret_key, g_crypto_context.protect_key,
-                        hex_iv, data, data_len, out, out_len);
+    SM_KEY_HANDLE h_key = NULL;
+    error_code = key_import_key(h_pipe, h_auth_key, g_crypto_context.protect_key, hex_secret_key, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    error_code = crypto_crypt(h_pipe, h_auth_key, h_key, encrypt, hex_iv, data, data_len, out, out_len);
+    key_destroy_key(h_pipe, h_key);
+
+    return error_code;
 }
 
 int ctx_decrypt(int device_index, int pipe_index, const char *hex_secret_key,
@@ -298,8 +303,13 @@ int ctx_decrypt(int device_index, int pipe_index, const char *hex_secret_key,
     if (error_code != YERR_SUCCESS) return error_code;
 
     bool encrypt = false;
-    return crypto_crypt(h_pipe, h_auth_key, encrypt, hex_secret_key, g_crypto_context.protect_key,
-                        hex_iv, data, data_len, out, out_len);
+    SM_KEY_HANDLE h_key = NULL;
+    error_code = key_import_key(h_pipe, h_auth_key, g_crypto_context.protect_key, hex_secret_key, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    error_code = crypto_crypt(h_pipe, h_auth_key, h_key, encrypt, hex_iv, data, data_len, out, out_len);
+    key_destroy_key(h_pipe, h_key);
+
+    return error_code;
 }
 
 

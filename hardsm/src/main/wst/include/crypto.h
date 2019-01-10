@@ -20,8 +20,8 @@ int crypto_digest_final(SM_PIPE_HANDLE h_pipe, const char *data, int data_len, c
 
 int crypto_random(SM_PIPE_HANDLE h_pipe, char *out, int out_len);
 
-int crypto_crypt(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, bool encrypt, const char *hex_secret_key,
-                 bool protect, const char *hex_iv, const char *data, int data_len, char *out, int *out_len);;
+int crypto_crypt(SM_PIPE_HANDLE h_pipe, SM_KEY_HANDLE h_auth_key, SM_KEY_HANDLE h_key, bool encrypt,
+                 const char *hex_iv, const char *data, int data_len, char *out, int *out_len);
 
 #ifdef __cplusplus
 }
