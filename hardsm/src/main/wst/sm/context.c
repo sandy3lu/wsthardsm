@@ -43,14 +43,8 @@ int final() {
     int i;
     for (i = 0; i < g_crypto_context.device_count; i++) {
         if (NULL != g_crypto_context.device_list[i].h_device) {
-          int ret = ctx_destroy_keys(i);
-          if (error_code == YERR_SUCCESS) error_code = ret;
-          ret = ctx_logout(i);
-          if (error_code == YERR_SUCCESS) error_code = ret;
-          ret = ctx_close_all_pipes(i);
-          if (error_code == YERR_SUCCESS) error_code = ret;
-          ret = ctx_close_device(i);
-          if (error_code == YERR_SUCCESS) error_code = ret;
+            int ret = ctx_free_device(i);
+            if (error_code == YERR_SUCCESS) error_code = ret;
         }
     }
 
@@ -127,6 +121,22 @@ int ctx_check_device(int index) {
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
     return dev_check_device(device_context);
+}
+
+int ctx_free_device(int index) {
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
+
+    int ret = ctx_destroy_keys(index);
+    if (error_code == YERR_SUCCESS) error_code = ret;
+    ret = ctx_logout(index);
+    if (error_code == YERR_SUCCESS) error_code = ret;
+    ret = ctx_close_all_pipes(index);
+    if (error_code == YERR_SUCCESS) error_code = ret;
+    ret = ctx_close_device(index);
+    if (error_code == YERR_SUCCESS) error_code = ret;
+
+    return error_code;
 }
 
 int ctx_open_all_pipes(int index) {

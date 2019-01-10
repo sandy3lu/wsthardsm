@@ -32,7 +32,7 @@ int final();
  * 打印内容会比较多，因此确保 buf 有足够大的空间，否者可能段错误，一般不应小于 1024 * 32 字节 */
 void ctx_print_context(char *buf, int buf_len, bool verbose);
 
-/* 统计检测到的加密卡数量 */
+/* 统计检测到的加密卡数量，幂等性 */
 int ctx_device_count();
 
 /* 打开指定索引的加密卡设备，比如主机插有 2 块加密卡，那么其索引分别为 0, 1.
@@ -41,7 +41,7 @@ int ctx_device_count();
  * 2. 非独占，一个进程打开某个加密卡的情况下，其他进程也能独立打开，并且谁打开谁负责关闭 */
 int ctx_open_device(int index);
 
-/* 一次性关闭该进程使用的所有加密卡 */
+/* 一次性关闭该进程使用的所有加密卡，幂等性 */
 int ctx_close_device();
 
 /* 实时获取指定加密卡的状态信息 */
@@ -49,6 +49,9 @@ DeviceStatus ctx_get_device_status(int index);
 
 /* 加密卡设备自检 */
 int ctx_check_device(int index);
+
+/* 释放设备所有资源，幂等性 */
+int ctx_free_device(int index);
 
 /* 打开某个加密卡上的所有安全通道，比如 westone B 卡有 32 个通道，
  * 一次性打开所有通道，是为了上层以多线程方式调用加密卡，充分利用加密卡资源，提升性能。
@@ -58,6 +61,7 @@ int ctx_open_all_pipes(int index);
 /* 关闭某个加密卡上的所有安全通道，满足幂等性 */
 int ctx_close_all_pipes(int index);
 
+/* 清理所有缓存的密钥，幂等性 */
 int ctx_destroy_keys(int index);
 
 /* 登录某个加密卡, 8 <= len(pin_code) <= 256，满足幂等性 */
