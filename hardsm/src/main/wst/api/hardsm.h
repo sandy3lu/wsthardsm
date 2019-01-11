@@ -25,6 +25,14 @@ int api_device_status(int device_index, uint8_t *out);
 
 int api_protect_key(int flag, uint8_t *out);
 
+int api_digest(int device_index, int pipe_index, char *data, int data_len, uint8_t *out);
+
+int api_digest_init(int device_index, int pipe_index, uint8_t *out);
+
+int api_digest_update(int device_index, int pipe_index, const char *data, int data_len, uint8_t *out);
+
+int api_digest_final(int device_index, int pipe_index, const char *data, int data_len, uint8_t *out);
+
 
 #ifdef __cplusplus
 }

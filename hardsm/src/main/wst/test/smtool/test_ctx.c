@@ -24,6 +24,8 @@ void test_ctx() {
     test_login_device();
 
     test_device_status(0);
+    test_crypto();
+    test_device_status(0);
 
     test_logout_device();
 
