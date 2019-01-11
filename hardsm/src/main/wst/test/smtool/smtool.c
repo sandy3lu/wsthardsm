@@ -32,3 +32,8 @@ void print_ctx_info(CtxInfo *ctx_info) {
     printf("device_count: %d\n", ctx_info->device_count);
     printf("api_version: %s\n", ctx_info->api_version);
 }
+
+void print_keypair(KeyPair *key_pair) {
+    printf("public_key: %s\n", key_pair->public_key);
+    printf("private_key: %s\n", key_pair->private_key);
+}

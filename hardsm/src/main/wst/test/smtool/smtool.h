@@ -20,6 +20,7 @@ void test_ctx();
 void check_response(Response *response);
 void print_dev_status(DevStatus *device_status);
 void print_ctx_info(CtxInfo *ctx_info);
+void print_keypair(KeyPair *key_pair);
 void test_crypto();
 
 

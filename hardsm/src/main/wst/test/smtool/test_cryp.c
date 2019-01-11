@@ -12,12 +12,16 @@ static char *encrypt_result = "eefb0602800038b355744473abe2a292eefb0602800038b35
 static void test_digest();
 static void test_digest_section();
 static void test_random();
+static void test_generate_key();
+static void test_generate_keypair();
 
 
 void test_crypto() {
     test_digest();
     test_digest_section();
     test_random();
+    test_generate_key();
+    test_generate_keypair();
 }
 
 static void test_digest() {
@@ -66,5 +70,27 @@ static void test_random() {
     check_response(response);
     StrValue *str_value = (StrValue *)response->str_value;
     printf("random: %s\n", str_value->value);
+    response__free_unpacked(response, NULL);
+}
+
+static void test_generate_key() {
+    uint8_t out[1024 * 32]  ={0};
+
+    int l = api_generate_key(0, 0, out);
+    Response *response = response__unpack(NULL, l, out);
+    check_response(response);
+    StrValue *str_value = (StrValue *)response->str_value;
+    printf("secret key: %s\n", str_value->value);
+    response__free_unpacked(response, NULL);
+}
+
+static void test_generate_keypair() {
+    uint8_t out[1024 * 32]  ={0};
+
+    int l = api_generate_keypair(0, 0, out);
+    Response *response = response__unpack(NULL, l, out);
+    check_response(response);
+    KeyPair *key_pair = (KeyPair *)response->key_pair;
+    print_keypair(key_pair);
     response__free_unpacked(response, NULL);
 }

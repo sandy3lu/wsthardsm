@@ -35,6 +35,10 @@ int api_digest_final(int device_index, int pipe_index, const char *data, int dat
 
 int api_random(int device_index, int pipe_index, int length, uint8_t *out);
 
+int api_generate_key(int device_index, int pipe_index, uint8_t *out);
+
+int api_generate_keypair(int device_index, int pipe_index, uint8_t *out);
+
 
 #ifdef __cplusplus
 }
