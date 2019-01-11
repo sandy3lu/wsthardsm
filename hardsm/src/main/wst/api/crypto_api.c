@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "../proto/protobuf-c.h"
 #include "../proto/sm.pb-c.h"
@@ -6,6 +7,7 @@
 #include "../include/util.h"
 #include "../include/data.h"
 #include "../include/device.h"
+#include "../include/crypto.h"
 #include "../include/context.h"
 #include "_hardsm.h"
 
@@ -56,6 +58,20 @@ int api_digest_final(int device_index, int pipe_index, const char *data, int dat
 
     char hex_out[256] = {0};
     error_code = ctx_digest_final(device_index, pipe_index, data, data_len, hex_out, sizeof(hex_out));
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    return str_response(&response, hex_out, out);
+
+fail:
+    return fail_response(&response, error_code, out);
+}
+
+int api_random(int device_index, int pipe_index, int length, uint8_t *out) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+
+    char hex_out[MAX_RANDOM_LEN * 2 + 1] = {0};
+    error_code = ctx_random(device_index, pipe_index, hex_out, length * 2 + 1);
     if (error_code != YERR_SUCCESS) goto fail;
 
     return str_response(&response, hex_out, out);

@@ -11,11 +11,13 @@ static char *encrypt_result = "eefb0602800038b355744473abe2a292eefb0602800038b35
 
 static void test_digest();
 static void test_digest_section();
+static void test_random();
 
 
 void test_crypto() {
     test_digest();
     test_digest_section();
+    test_random();
 }
 
 static void test_digest() {
@@ -53,5 +55,16 @@ static void test_digest_section() {
     check_response(response);
     StrValue *str_value = (StrValue *)response->str_value;
     printf("digest: %s\n", str_value->value);
+    response__free_unpacked(response, NULL);
+}
+
+static void test_random() {
+    uint8_t out[1024 * 32]  ={0};
+
+    int l = api_random(0, 0, 16, out);
+    Response *response = response__unpack(NULL, l, out);
+    check_response(response);
+    StrValue *str_value = (StrValue *)response->str_value;
+    printf("random: %s\n", str_value->value);
     response__free_unpacked(response, NULL);
 }

@@ -33,6 +33,8 @@ int api_digest_update(int device_index, int pipe_index, const char *data, int da
 
 int api_digest_final(int device_index, int pipe_index, const char *data, int data_len, uint8_t *out);
 
+int api_random(int device_index, int pipe_index, int length, uint8_t *out);
+
 
 #ifdef __cplusplus
 }
