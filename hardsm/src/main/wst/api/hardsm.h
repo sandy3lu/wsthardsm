@@ -43,6 +43,26 @@ int api_encrypt(int device_index, int pipe_index, char *hex_key, char *hex_iv, c
 
 int api_decrypt(int device_index, int pipe_index, char *hex_key, char *hex_iv, char *data, int data_len, uint8_t *out);
 
+int api_encrypt_init(int device_index, int pipe_index, char *hex_key, char *hex_iv, uint8_t *out);
+
+int api_decrypt_init(int device_index, int pipe_index, char *hex_key, char *hex_iv, uint8_t *out);
+
+int api_encrypt_init(int device_index, int pipe_index, char *hex_key, char *hex_iv, uint8_t *out);
+
+int api_encrypt_update(int device_index, int pipe_index, char *data, int data_len, uint8_t *out);
+
+int api_encrypt_final(int device_index, int pipe_index, char *data, int data_len, uint8_t *out);
+
+int api_decrypt_init(int device_index, int pipe_index, char *hex_key, char *hex_iv, uint8_t *out);
+
+int api_decrypt_update(int device_index, int pipe_index, char *data, int data_len, uint8_t *out);
+
+int api_decrypt_final(int device_index, int pipe_index, char *data, int data_len, uint8_t *out);
+
+int api_sign(int device_index, int pipe_index, char *hex_key, char *hex_data, uint8_t *out);
+
+int api_verify(int device_index, int pipe_index, char *hex_key, char *hex_data, char *hex_signature, uint8_t *out);
+
 
 #ifdef __cplusplus
 }
