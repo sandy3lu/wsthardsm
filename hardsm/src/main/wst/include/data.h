@@ -21,9 +21,10 @@ typedef struct {
 } DeviceStatus;
 
 typedef struct {
-    int count;
-    DeviceStatus device_status_list[MAX_DEVICE_STATUS_NUMBER];
-} DeviceStatuses;
+    bool protect_key;
+    int device_count;
+    char api_version[33];
+} ContextInfo;
 
 
 #ifdef __cplusplus

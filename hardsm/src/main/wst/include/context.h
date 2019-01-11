@@ -32,8 +32,8 @@ int final();
  * 打印内容会比较多，因此确保 buf 有足够大的空间，否者可能段错误，一般不应小于 1024 * 32 字节 */
 void ctx_print_context(char *buf, int buf_len, bool verbose);
 
-/* 统计检测到的加密卡数量，幂等性 */
-int ctx_device_count();
+/* 上下文信息，幂等性 */
+ContextInfo ctx_info();
 
 /* 打开指定索引的加密卡设备，比如主机插有 2 块加密卡，那么其索引分别为 0, 1.
  * 该打开方式有两个特性:
@@ -147,7 +147,6 @@ int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *v
 int print_device_context(DeviceContext *device_context, char *buf);
 int print_statistics(CryptoContext *crypto_context, char *buf);
 int print_device_status(DeviceStatus *device_status, char *buf);
-int print_device_statuses(DeviceStatuses *device_statuses, char *buf);
 
 
 #ifdef __cplusplus

@@ -10,7 +10,7 @@ void print_response_status(Response *response);
 int api_init(uint8_t *out);
 int api_final(uint8_t *out);
 int api_print_context(int verbose, uint8_t *out);
-int api_device_count(uint8_t *out);
+int api_ctx_info(uint8_t *out);
 
 /* 1. open device
  * 2. check device

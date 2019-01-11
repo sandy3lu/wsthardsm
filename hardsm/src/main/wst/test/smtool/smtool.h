@@ -19,6 +19,7 @@ typedef int bool;
 void test_ctx();
 void check_response(Response *response);
 void print_dev_status(DevStatus *device_status);
+void print_ctx_info(CtxInfo *ctx_info);
 
 
 #ifdef __cplusplus

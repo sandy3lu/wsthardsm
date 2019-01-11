@@ -28,6 +28,12 @@ message DevStatus {
     int32 private_key_count = 8;
 }
 
+message CtxInfo {
+    bool protect_key = 1;
+    int32 device_count = 2;
+    string api_version = 3;
+}
+
 message Response {
     int32 code = 1;
     string msg = 2;
@@ -37,5 +43,6 @@ message Response {
         StrValue str_value = 6;
         KeyPair key_pair = 7;
         DevStatus device_status = 8;
+        CtxInfo ctx_info = 9;
     }
 }

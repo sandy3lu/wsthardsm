@@ -10,7 +10,7 @@ static void test_print_context();
 static void test_login_device();
 static void test_logout_device();
 static void test_device_status();
-static void test_device_count();
+static int test_ctx_info();
 
 
 void test_ctx() {
@@ -21,9 +21,14 @@ void test_ctx() {
     check_response(response);
     response__free_unpacked(response, NULL);
 
-    test_device_count();
+    int device_count = test_ctx_info();
     test_login_device();
-    test_device_status();
+
+    int i;
+    for (i = 0; i < device_count; i++) {
+        test_device_status(i);
+    }
+
     test_logout_device();
 
 
@@ -62,10 +67,10 @@ static void test_logout_device() {
     response__free_unpacked(response, NULL);
 }
 
-static void test_device_status() {
+static void test_device_status(int device_index) {
     uint8_t out[1024 * 32]  ={0};
 
-    int l = api_device_status(0, out);
+    int l = api_device_status(device_index, out);
     Response *response = response__unpack(NULL, l, out);
     check_response(response);
     DevStatus *device_status = (DevStatus *)response->device_status;
@@ -73,13 +78,15 @@ static void test_device_status() {
     response__free_unpacked(response, NULL);
 }
 
-static void test_device_count() {
+static int test_ctx_info() {
     uint8_t out[1024 * 32]  ={0};
 
-    int l = api_device_count(out);
+    int l = api_ctx_info(out);
     Response *response = response__unpack(NULL, l, out);
     check_response(response);
-    IntValue *int_value = (IntValue *)response->int_value;
-    printf("device count: %d\n", int_value->value);
+    CtxInfo *ctx_info = (CtxInfo *)response->ctx_info;
+    print_ctx_info(ctx_info);
+    int device_count = ctx_info->device_count;
     response__free_unpacked(response, NULL);
+    return device_count;
 }

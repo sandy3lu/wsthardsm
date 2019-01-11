@@ -17,10 +17,6 @@ void test_device() {
     error_code = init();
     if (error_code != YERR_SUCCESS) print_error(error_code);
 
-    int device_count = ctx_device_count();
-    printf("device count: %d\n", device_count);
-
-
     error_code = ctx_open_device(0);
     if (error_code != YERR_SUCCESS) print_error(error_code);
     error_code = ctx_open_all_pipes(0);

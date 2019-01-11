@@ -88,9 +88,9 @@ int api_device_status(int device_index, uint8_t *out) {
     return device_status_response(&response, &device_status, out);
 }
 
-int api_device_count(uint8_t *out) {
+int api_ctx_info(uint8_t *out) {
     Response response = RESPONSE__INIT;
 
-    int count = ctx_device_count();
-    return int_response(&response, count, out);
+    ContextInfo info = ctx_info();
+    return ctx_info_response(&response, &info, out);
 }

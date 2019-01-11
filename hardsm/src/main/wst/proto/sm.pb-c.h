@@ -20,6 +20,7 @@ typedef struct _IntValue IntValue;
 typedef struct _StrValue StrValue;
 typedef struct _KeyPair KeyPair;
 typedef struct _DevStatus DevStatus;
+typedef struct _CtxInfo CtxInfo;
 typedef struct _Response Response;
 
 
@@ -96,6 +97,20 @@ struct  _DevStatus
     , 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0 }
 
 
+struct  _CtxInfo
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_protect_key;
+  protobuf_c_boolean protect_key;
+  protobuf_c_boolean has_device_count;
+  int32_t device_count;
+  char *api_version;
+};
+#define CTX_INFO__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&ctx_info__descriptor) \
+    , 0,0, 0,0, NULL }
+
+
 typedef enum {
   RESPONSE__DATA__NOT_SET = 0,
   RESPONSE__DATA_BOOL_VALUE = 4,
@@ -103,6 +118,7 @@ typedef enum {
   RESPONSE__DATA_STR_VALUE = 6,
   RESPONSE__DATA_KEY_PAIR = 7,
   RESPONSE__DATA_DEVICE_STATUS = 8,
+  RESPONSE__DATA_CTX_INFO = 9,
 } Response__DataCase;
 
 struct  _Response
@@ -118,6 +134,7 @@ struct  _Response
     StrValue *str_value;
     KeyPair *key_pair;
     DevStatus *device_status;
+    CtxInfo *ctx_info;
   };
 };
 #define RESPONSE__INIT \
@@ -220,6 +237,25 @@ DevStatus *
 void   dev_status__free_unpacked
                      (DevStatus *message,
                       ProtobufCAllocator *allocator);
+/* CtxInfo methods */
+void   ctx_info__init
+                     (CtxInfo         *message);
+size_t ctx_info__get_packed_size
+                     (const CtxInfo   *message);
+size_t ctx_info__pack
+                     (const CtxInfo   *message,
+                      uint8_t             *out);
+size_t ctx_info__pack_to_buffer
+                     (const CtxInfo   *message,
+                      ProtobufCBuffer     *buffer);
+CtxInfo *
+       ctx_info__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   ctx_info__free_unpacked
+                     (CtxInfo *message,
+                      ProtobufCAllocator *allocator);
 /* Response methods */
 void   response__init
                      (Response         *message);
@@ -256,6 +292,9 @@ typedef void (*KeyPair_Closure)
 typedef void (*DevStatus_Closure)
                  (const DevStatus *message,
                   void *closure_data);
+typedef void (*CtxInfo_Closure)
+                 (const CtxInfo *message,
+                  void *closure_data);
 typedef void (*Response_Closure)
                  (const Response *message,
                   void *closure_data);
@@ -270,6 +309,7 @@ extern const ProtobufCMessageDescriptor int_value__descriptor;
 extern const ProtobufCMessageDescriptor str_value__descriptor;
 extern const ProtobufCMessageDescriptor key_pair__descriptor;
 extern const ProtobufCMessageDescriptor dev_status__descriptor;
+extern const ProtobufCMessageDescriptor ctx_info__descriptor;
 extern const ProtobufCMessageDescriptor response__descriptor;
 
 PROTOBUF_C__END_DECLS

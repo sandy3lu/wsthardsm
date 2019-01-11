@@ -104,9 +104,28 @@ int device_status_response(Response *response, DeviceStatus *device_status, uint
     dev_status.has_public_key_count = true;
     dev_status.private_key_count = device_status->private_key_count;
     dev_status.has_private_key_count = true;
-    response->data_case = RESPONSE__DATA_DEVICE_STATUS;
 
+    response->data_case = RESPONSE__DATA_DEVICE_STATUS;
     response->device_status = &dev_status;
+
+    return response__pack(response, out);
+}
+
+int ctx_info_response(Response *response, ContextInfo *context_info, uint8_t *out) {
+    response->code = YERR_SUCCESS;
+    response->has_code = true;
+    response->msg = "";
+
+    CtxInfo ctx_info = CTX_INFO__INIT;
+
+    ctx_info.protect_key = context_info->protect_key;
+    ctx_info.has_protect_key = true;
+    ctx_info.device_count = context_info->device_count;
+    ctx_info.has_device_count = true;
+    ctx_info.api_version = context_info->api_version;
+
+    response->data_case = RESPONSE__DATA_CTX_INFO;
+    response->ctx_info = &ctx_info;
 
     return response__pack(response, out);
 }

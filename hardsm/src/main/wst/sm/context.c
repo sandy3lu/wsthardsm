@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "../include/sm_api.h"
@@ -72,8 +73,12 @@ void ctx_print_context(char *buf, int buf_len, bool verbose) {
     }
 }
 
-int ctx_device_count() {
-    return g_crypto_context.device_count;
+ContextInfo ctx_info() {
+    ContextInfo context_info;
+    context_info.protect_key = g_crypto_context.protect_key;
+    context_info.device_count = g_crypto_context.device_count;
+    memcpy(context_info.api_version, g_crypto_context.api_version, sizeof(context_info.api_version));
+    return context_info;
 }
 
 int ctx_open_device(int index) {

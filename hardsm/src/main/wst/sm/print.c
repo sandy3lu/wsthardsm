@@ -406,16 +406,3 @@ int print_device_status(DeviceStatus *device_status, char *buf) {
 
     return cursor - buf;
 }
-
-int print_device_statuses(DeviceStatuses *device_statuses, char *buf) {
-    int delta = 0;
-    char *cursor = buf;
-
-    int i;
-    for (i = 0; i < device_statuses->count; i++) {
-        delta = print_device_status(&(device_statuses->device_status_list[i]), cursor);
-        cursor += delta;
-    }
-
-    return cursor - buf;
-}

@@ -26,3 +26,9 @@ void print_dev_status(DevStatus *device_status) {
     printf("public_key_count: %d\n", device_status->public_key_count);
     printf("private_key_count: %d\n", device_status->private_key_count);
 }
+
+void print_ctx_info(CtxInfo *ctx_info) {
+    printf("protect_key: %d\n", ctx_info->protect_key);
+    printf("device_count: %d\n", ctx_info->device_count);
+    printf("api_version: %s\n", ctx_info->api_version);
+}

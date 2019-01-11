@@ -222,6 +222,49 @@ void   dev_status__free_unpacked
   assert(message->base.descriptor == &dev_status__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   ctx_info__init
+                     (CtxInfo         *message)
+{
+  static CtxInfo init_value = CTX_INFO__INIT;
+  *message = init_value;
+}
+size_t ctx_info__get_packed_size
+                     (const CtxInfo *message)
+{
+  assert(message->base.descriptor == &ctx_info__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t ctx_info__pack
+                     (const CtxInfo *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &ctx_info__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t ctx_info__pack_to_buffer
+                     (const CtxInfo *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &ctx_info__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+CtxInfo *
+       ctx_info__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (CtxInfo *)
+     protobuf_c_message_unpack (&ctx_info__descriptor,
+                                allocator, len, data);
+}
+void   ctx_info__free_unpacked
+                     (CtxInfo *message,
+                      ProtobufCAllocator *allocator)
+{
+  assert(message->base.descriptor == &ctx_info__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   response__init
                      (Response         *message)
 {
@@ -559,7 +602,71 @@ const ProtobufCMessageDescriptor dev_status__descriptor =
   (ProtobufCMessageInit) dev_status__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor response__field_descriptors[7] =
+static const ProtobufCFieldDescriptor ctx_info__field_descriptors[3] =
+{
+  {
+    "protect_key",
+    1,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_BOOL,
+    offsetof(CtxInfo, has_protect_key),
+    offsetof(CtxInfo, protect_key),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "device_count",
+    2,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(CtxInfo, has_device_count),
+    offsetof(CtxInfo, device_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "api_version",
+    3,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(CtxInfo, api_version),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned ctx_info__field_indices_by_name[] = {
+  2,   /* field[2] = api_version */
+  1,   /* field[1] = device_count */
+  0,   /* field[0] = protect_key */
+};
+static const ProtobufCIntRange ctx_info__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 3 }
+};
+const ProtobufCMessageDescriptor ctx_info__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "CtxInfo",
+  "CtxInfo",
+  "CtxInfo",
+  "",
+  sizeof(CtxInfo),
+  3,
+  ctx_info__field_descriptors,
+  ctx_info__field_indices_by_name,
+  1,  ctx_info__number_ranges,
+  (ProtobufCMessageInit) ctx_info__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor response__field_descriptors[8] =
 {
   {
     "code",
@@ -645,10 +752,23 @@ static const ProtobufCFieldDescriptor response__field_descriptors[7] =
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "ctx_info",
+    9,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Response, data_case),
+    offsetof(Response, ctx_info),
+    &ctx_info__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned response__field_indices_by_name[] = {
   2,   /* field[2] = bool_value */
   0,   /* field[0] = code */
+  7,   /* field[7] = ctx_info */
   6,   /* field[6] = device_status */
   3,   /* field[3] = int_value */
   5,   /* field[5] = key_pair */
@@ -659,7 +779,7 @@ static const ProtobufCIntRange response__number_ranges[2 + 1] =
 {
   { 1, 0 },
   { 4, 2 },
-  { 0, 7 }
+  { 0, 8 }
 };
 const ProtobufCMessageDescriptor response__descriptor =
 {
@@ -669,7 +789,7 @@ const ProtobufCMessageDescriptor response__descriptor =
   "Response",
   "",
   sizeof(Response),
-  7,
+  8,
   response__field_descriptors,
   response__field_indices_by_name,
   2,  response__number_ranges,
