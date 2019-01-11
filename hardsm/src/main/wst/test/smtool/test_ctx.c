@@ -6,34 +6,43 @@
 #include "smtool.h"
 
 
+static void test_init();
+static void test_final();
 static void test_print_context();
 static void test_login_device();
 static void test_logout_device();
 static void test_device_status();
 static int test_ctx_info();
+static void test_protect_key(int flag);
 
 
 void test_ctx() {
+    test_init();
+
+    test_ctx_info();
+
+    test_login_device();
+
+    test_device_status(0);
+
+    test_logout_device();
+
+    test_final();
+}
+
+static void test_init() {
     uint8_t out[1024 * 32]  ={0};
 
     int l = api_init(out);
     Response *response = response__unpack(NULL, l, out);
     check_response(response);
     response__free_unpacked(response, NULL);
+}
 
-    int device_count = test_ctx_info();
-    test_login_device();
-
-    int i;
-    for (i = 0; i < device_count; i++) {
-        test_device_status(i);
-    }
-
-    test_logout_device();
-
-
-    l = api_final(out);
-    response = response__unpack(NULL, l, out);
+static void test_final() {
+    uint8_t out[1024 * 32]  ={0};
+    int l = api_final(out);
+    Response *response = response__unpack(NULL, l, out);
     check_response(response);
     response__free_unpacked(response, NULL);
 }
@@ -89,4 +98,13 @@ static int test_ctx_info() {
     int device_count = ctx_info->device_count;
     response__free_unpacked(response, NULL);
     return device_count;
+}
+
+static void test_protect_key(int flag) {
+    uint8_t out[1024 * 32]  ={0};
+
+    int l = api_protect_key(flag, out);
+    Response *response = response__unpack(NULL, l, out);
+    check_response(response);
+    response__free_unpacked(response, NULL);
 }

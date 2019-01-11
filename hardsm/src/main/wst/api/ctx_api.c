@@ -94,3 +94,9 @@ int api_ctx_info(uint8_t *out) {
     ContextInfo info = ctx_info();
     return ctx_info_response(&response, &info, out);
 }
+
+int api_protect_key(int flag, uint8_t *out) {
+    Response response = RESPONSE__INIT;
+    ctx_set_protect_key_flag(flag);
+    return empty_response(&response, out);
+}

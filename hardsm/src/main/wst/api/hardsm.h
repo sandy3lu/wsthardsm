@@ -23,6 +23,8 @@ int api_logout_device(int device_index, uint8_t *out);
 
 int api_device_status(int device_index, uint8_t *out);
 
+int api_protect_key(int flag, uint8_t *out);
+
 
 #ifdef __cplusplus
 }
