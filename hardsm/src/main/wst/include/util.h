@@ -38,6 +38,7 @@ typedef int bool;
 #define KEY_LENGTH_INVALID          610
 #define IV_LENGTH_INVALID           611
 #define BLOCK_LENGTH_INVALID        612
+#define DATA_TOO_LONG               613
 
 
 enum LOG_LEVEL {

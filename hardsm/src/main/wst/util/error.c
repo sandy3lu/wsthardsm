@@ -25,6 +25,7 @@ void init_error_string() {
     MSGS[KEY_LENGTH_INVALID] = "key length invalid";
     MSGS[IV_LENGTH_INVALID] = "iv length invalid";
     MSGS[BLOCK_LENGTH_INVALID] = "block length invalid";
+    MSGS[DATA_TOO_LONG] = "data length too long";
 }
 
 char *get_error_string(int code) {

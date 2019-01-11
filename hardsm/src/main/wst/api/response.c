@@ -81,6 +81,22 @@ int keypair_response(Response *response, char *public_key, char *private_key, ui
     return response__pack(response, out);
 }
 
+int bytes_response(Response *response, char *data, int data_len, uint8_t *out) {
+    response->code = YERR_SUCCESS;
+    response->has_code = true;
+    response->msg = "";
+
+    BytesValue bytes_value = BYTES_VALUE__INIT;
+    bytes_value.value.len = data_len;
+    bytes_value.value.data = (uint8_t *)data;
+    bytes_value.has_value = true;
+
+    response->data_case = RESPONSE__DATA_BYTES_VALUE;
+    response->bytes_value = &bytes_value;
+
+    return response__pack(response, out);
+}
+
 int device_status_response(Response *response, DeviceStatus *device_status, uint8_t *out) {
     response->code = YERR_SUCCESS;
     response->has_code = true;

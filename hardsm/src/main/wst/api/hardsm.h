@@ -39,6 +39,10 @@ int api_generate_key(int device_index, int pipe_index, uint8_t *out);
 
 int api_generate_keypair(int device_index, int pipe_index, uint8_t *out);
 
+int api_encrypt(int device_index, int pipe_index, char *hex_key, char *hex_iv, char *data, int data_len, uint8_t *out);
+
+int api_decrypt(int device_index, int pipe_index, char *hex_key, char *hex_iv, char *data, int data_len, uint8_t *out);
+
 
 #ifdef __cplusplus
 }

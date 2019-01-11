@@ -2,9 +2,9 @@
 #include <assert.h>
 #include "../../proto/sm.pb-c.h"
 #include "../../include/sm_api.h"
+#include "../../include/util.h"
 #include "../../api/hardsm.h"
 #include "smtool.h"
-
 
 
 int main(int argc, char **argv) {
@@ -36,4 +36,12 @@ void print_ctx_info(CtxInfo *ctx_info) {
 void print_keypair(KeyPair *key_pair) {
     printf("public_key: %s\n", key_pair->public_key);
     printf("private_key: %s\n", key_pair->private_key);
+}
+
+void print_bytes(BytesValue *bytes) {
+    ProtobufCBinaryData *value = &(bytes->value);
+    char buf[1024 * 1024 * 4] = {0};
+    to_hex(buf, sizeof(buf), (const char *)value->data, value->len);
+    printf("data_len: %ld\n", value->len);
+    printf("encrypted data: %s\n", buf);
 }

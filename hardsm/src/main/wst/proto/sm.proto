@@ -12,6 +12,10 @@ message StrValue {
     string value = 1;
 }
 
+message BytesValue {
+    bytes value = 1;
+}
+
 message KeyPair {
     string public_key = 1;
     string private_key = 2;
@@ -41,8 +45,9 @@ message Response {
         BoolValue bool_value = 4;
         IntValue int_value = 5;
         StrValue str_value = 6;
-        KeyPair key_pair = 7;
-        DevStatus device_status = 8;
-        CtxInfo ctx_info = 9;
+        BytesValue bytes_value = 7;
+        KeyPair key_pair = 8;
+        DevStatus device_status = 9;
+        CtxInfo ctx_info = 10;
     }
 }

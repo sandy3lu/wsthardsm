@@ -18,6 +18,7 @@ PROTOBUF_C__BEGIN_DECLS
 typedef struct _BoolValue BoolValue;
 typedef struct _IntValue IntValue;
 typedef struct _StrValue StrValue;
+typedef struct _BytesValue BytesValue;
 typedef struct _KeyPair KeyPair;
 typedef struct _DevStatus DevStatus;
 typedef struct _CtxInfo CtxInfo;
@@ -59,6 +60,17 @@ struct  _StrValue
 #define STR_VALUE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&str_value__descriptor) \
     , NULL }
+
+
+struct  _BytesValue
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_value;
+  ProtobufCBinaryData value;
+};
+#define BYTES_VALUE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&bytes_value__descriptor) \
+    , 0,{0,NULL} }
 
 
 struct  _KeyPair
@@ -116,9 +128,10 @@ typedef enum {
   RESPONSE__DATA_BOOL_VALUE = 4,
   RESPONSE__DATA_INT_VALUE = 5,
   RESPONSE__DATA_STR_VALUE = 6,
-  RESPONSE__DATA_KEY_PAIR = 7,
-  RESPONSE__DATA_DEVICE_STATUS = 8,
-  RESPONSE__DATA_CTX_INFO = 9,
+  RESPONSE__DATA_BYTES_VALUE = 7,
+  RESPONSE__DATA_KEY_PAIR = 8,
+  RESPONSE__DATA_DEVICE_STATUS = 9,
+  RESPONSE__DATA_CTX_INFO = 10,
 } Response__DataCase;
 
 struct  _Response
@@ -132,6 +145,7 @@ struct  _Response
     BoolValue *bool_value;
     IntValue *int_value;
     StrValue *str_value;
+    BytesValue *bytes_value;
     KeyPair *key_pair;
     DevStatus *device_status;
     CtxInfo *ctx_info;
@@ -198,6 +212,25 @@ StrValue *
                       const uint8_t       *data);
 void   str_value__free_unpacked
                      (StrValue *message,
+                      ProtobufCAllocator *allocator);
+/* BytesValue methods */
+void   bytes_value__init
+                     (BytesValue         *message);
+size_t bytes_value__get_packed_size
+                     (const BytesValue   *message);
+size_t bytes_value__pack
+                     (const BytesValue   *message,
+                      uint8_t             *out);
+size_t bytes_value__pack_to_buffer
+                     (const BytesValue   *message,
+                      ProtobufCBuffer     *buffer);
+BytesValue *
+       bytes_value__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   bytes_value__free_unpacked
+                     (BytesValue *message,
                       ProtobufCAllocator *allocator);
 /* KeyPair methods */
 void   key_pair__init
@@ -286,6 +319,9 @@ typedef void (*IntValue_Closure)
 typedef void (*StrValue_Closure)
                  (const StrValue *message,
                   void *closure_data);
+typedef void (*BytesValue_Closure)
+                 (const BytesValue *message,
+                  void *closure_data);
 typedef void (*KeyPair_Closure)
                  (const KeyPair *message,
                   void *closure_data);
@@ -307,6 +343,7 @@ typedef void (*Response_Closure)
 extern const ProtobufCMessageDescriptor bool_value__descriptor;
 extern const ProtobufCMessageDescriptor int_value__descriptor;
 extern const ProtobufCMessageDescriptor str_value__descriptor;
+extern const ProtobufCMessageDescriptor bytes_value__descriptor;
 extern const ProtobufCMessageDescriptor key_pair__descriptor;
 extern const ProtobufCMessageDescriptor dev_status__descriptor;
 extern const ProtobufCMessageDescriptor ctx_info__descriptor;

@@ -14,6 +14,7 @@ int str_response(Response *response, char *value, uint8_t *out);
 int keypair_response(Response *response, char *public_key, char *private_key, uint8_t *out);
 int device_status_response(Response *response, DeviceStatus *device_status, uint8_t *out);
 int ctx_info_response(Response *response, ContextInfo *context_info, uint8_t *out);
+int bytes_response(Response *response, char *data, int data_len, uint8_t *out);
 
 
 #ifdef __cplusplus
