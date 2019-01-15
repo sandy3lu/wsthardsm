@@ -1,0 +1,7 @@
+#!/bin/sh
+device="pxs50.ko"
+
+#invoke rmove mode with all arguments we got
+
+rmmod $device
+

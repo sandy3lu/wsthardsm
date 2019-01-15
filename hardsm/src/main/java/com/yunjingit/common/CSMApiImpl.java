@@ -2,6 +2,8 @@ package com.yunjingit.common;
 
 import com.sun.jna.Native;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class CSMApiImpl {
@@ -11,7 +13,10 @@ public class CSMApiImpl {
     private byte[] normal_buf;
     private byte[] large_buf;
 
-    CSMApiImpl() {
+    CSMApiImpl() throws IOException {
+        System.out.println(System.getProperty("user.dir"));
+        String path = new File(".").getCanonicalPath();
+        System.out.println(path);
         this.solib = (CSMApi) Native.loadLibrary("yjsmwst", CSMApi.class);
         this.normal_buf = new byte[NORMAL_BUF_SIZE];
         this.large_buf = new byte[LARGE_BUF_SIZE];
