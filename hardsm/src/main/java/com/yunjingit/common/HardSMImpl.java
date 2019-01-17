@@ -1,10 +1,14 @@
 package com.yunjingit.common;
 
 import java.util.Arrays;
-import java.io.IOException;
 import com.sun.jna.Native;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.yunjingit.common.Sm.CtxInfo;
+import com.yunjingit.common.Sm.DevStatus;
 
+/**
+ * HardSMImpl is not thread safety, different thread should use there own HardSMImpl instance
+ */
 public class HardSMImpl implements HardSM {
     private static final int NORMAL_BUF_SIZE = 256;
     private static final int LARGE_BUF_SIZE = 1024 * 32;
@@ -12,13 +16,13 @@ public class HardSMImpl implements HardSM {
     private byte[] normal_buf;
     private byte[] large_buf;
 
-    HardSMImpl() throws IOException {
-        this.solib = (CSMApi) Native.loadLibrary("/usr/local/lib/libyjsmwst.so", CSMApi.class);
+    HardSMImpl() {
+        this.solib = (CSMApi) Native.loadLibrary("yjsmwst", CSMApi.class);
         this.normal_buf = new byte[NORMAL_BUF_SIZE];
         this.large_buf = new byte[LARGE_BUF_SIZE];
     }
 
-    public void api_init() throws SMException {
+    public void apiInit() throws SMException {
         try {
             int i = this.solib.api_init(this.normal_buf);
             byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
@@ -29,7 +33,7 @@ public class HardSMImpl implements HardSM {
         }
     }
 
-    public void api_final() throws SMException {
+    public void apiFinal() throws SMException {
         try {
             int i = this.solib.api_final(this.normal_buf);
             byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
@@ -40,12 +44,98 @@ public class HardSMImpl implements HardSM {
         }
     }
 
-    public int api_print_context(int verbose, byte[] out) {
-        return 0;
+    public String apiPrintContext(boolean verbose) throws SMException {
+        try {
+            int i = this.solib.api_print_context(verbose? 1 : 0, this.large_buf);
+            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
     }
 
-    public int api_login_device(int deviceIndex, String pinCode, byte[] out) {
-        return 0;
+    public CtxInfo apiCtxInfo() throws SMException {
+        try {
+            int i = this.solib.api_ctx_info(this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getCtxInfo();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    public void apiLoginDevice(int deviceIndex, String pinCode) throws SMException {
+        try {
+            int i = this.solib.api_login_device(deviceIndex, pinCode, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    public void apiLogoutDevice(int deviceIndex) throws SMException {
+        try {
+            int i = this.solib.api_logout_device(deviceIndex, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    public DevStatus apiDeviceStatus(int deviceIndex) throws SMException {
+        try {
+            int i = this.solib.api_device_status(deviceIndex, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getDeviceStatus();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    public void apiProtectKey(boolean flag) throws SMException {
+        try {
+            int i = this.solib.api_protect_key(flag? 1 : 0, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public String apiDigest(int device_index, int pipe_index, byte[] data) {
+        return null;
+    }
+
+    @Override
+    public void apiDigestInit(int device_index, int pipe_index) {
+
+    }
+
+    @Override
+    public void apiDigestUpdate(int device_index, int pipe_index, byte[] data) {
+
+    }
+
+    @Override
+    public String apiDigestFinal(int device_index, int pipe_index, byte[] data) {
+        return null;
+    }
+
+    @Override
+    public String apiRandom(int device_index, int pipe_index, int length) {
+        return null;
     }
 
     private void parseResponse(Sm.Response response) throws SMException {
