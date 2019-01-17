@@ -16,24 +16,27 @@ public class SMTool {
         hardSM.apiFinal();
     }
 
-    private static void testCtxInfo(HardSM hardSM) throws SMException {
+    static void testCtxInfo(HardSM hardSM) throws SMException {
         CtxInfo ctxInfo = hardSM.apiCtxInfo();
         System.out.println("protect_key: " + ctxInfo.getProtectKey());
         System.out.println("device_count: " + ctxInfo.getDeviceCount());
         System.out.println("api_version: " + ctxInfo.getApiVersion());
     }
 
-    private static void testDevice(HardSM hardSM, int index, String pinCode) throws SMException {
+    static void testDevice(HardSM hardSM, int index, String pinCode) throws SMException {
         hardSM.apiLoginDevice(index, pinCode);
 
         SMTool.testDeviceStatus(hardSM, index);
         SMTool.testDigest(hardSM, index, 0, "abc");
         SMTool.testDigest(hardSM, index, 31, "abc");
 
+        SMTool.testSectionDigest(hardSM, index, 0, "0123456701234567012345670123456701234567012345670123456701234567");
+        SMTool.testSectionDigest(hardSM, index, 31, "0123456701234567012345670123456701234567012345670123456701234567");
+
         hardSM.apiLogoutDevice(index);
     }
 
-    private static void testDeviceStatus(HardSM hardSM, int index) throws SMException {
+    static void testDeviceStatus(HardSM hardSM, int index) throws SMException {
         DevStatus devStatus = hardSM.apiDeviceStatus(index);
         System.out.println("index: " + devStatus.getIndex());
         System.out.println("opened: " + devStatus.getOpened());
@@ -45,7 +48,14 @@ public class SMTool {
         System.out.println("private_key_count: " + devStatus.getPrivateKeyCount());
     }
 
-    private static void testDigest(HardSM hardSM, int deviceIndex, int pipeIndex, String data) throws SMException {
+    static void testDigest(HardSM hardSM, int deviceIndex, int pipeIndex, String data) throws SMException {
         System.out.println(hardSM.apiDigest(deviceIndex, pipeIndex, data.getBytes()));
+    }
+
+    static void testSectionDigest(HardSM hardSM, int deviceIndex, int pipeIndex, String data) throws SMException {
+        hardSM.apiDigestInit(deviceIndex, pipeIndex);
+        hardSM.apiDigestUpdate(deviceIndex, pipeIndex, data.getBytes());
+        hardSM.apiDigestUpdate(deviceIndex, pipeIndex, data.getBytes());
+        System.out.println(hardSM.apiDigestFinal(deviceIndex, pipeIndex, data.getBytes()));
     }
 }
