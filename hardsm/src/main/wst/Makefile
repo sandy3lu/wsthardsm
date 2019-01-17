@@ -40,7 +40,7 @@ all: clean $(YJSMWST_LIB) demo
 
 # --- build libyjsmwst.so ---
 $(YJSMWST_LIB) : $(SM_OBJ) $(PROTO_OBJ) $(UTIL_OBJ) $(API_OBJ) | $(TARGET_DIR)
-	$(CC) -o $@ $^ -shared $(LIB_DIR)/libsmwst.so
+	$(CC) -o $@ $^ -shared -L$(LIB_DIR) -lsmwst
 	cp $(YJSMWST_LIB) $(LIB_DIR)/
 
 $(OUT_DIR)/%.o : util/%.c | $(OUT_DIR)
@@ -62,12 +62,12 @@ $(OUT_DIR) $(TARGET_DIR):
 # --- demo ---
 demo: smtest smtool
 
-smtest : $(SMTEST_OBJ) $(LIB_DIR)/libyjsmwst.so $(LIB_DIR)/libsmwst.so | $(TARGET_DIR)
-	$(CC) -o $(SM_TEST) $^
+smtest : $(SMTEST_OBJ)  | $(TARGET_DIR)
+	$(CC) -o $(SM_TEST) $^ -L$(LIB_DIR) -lsmwst -lyjsmwst
 	cp $(SM_TEST) $(LIB_DIR)
 
-smtool : $(SMTOOL_OBJ) $(LIB_DIR)/libyjsmwst.so $(LIB_DIR)/libsmwst.so | $(TARGET_DIR)
-	$(CC) -o $(SM_TOOL) $^
+smtool : $(SMTOOL_OBJ) | $(TARGET_DIR)
+	$(CC) -o $(SM_TOOL) $^ -L$(LIB_DIR) -lsmwst -lyjsmwst
 	cp $(SM_TOOL) $(LIB_DIR)
 
 $(OUT_DIR)/%.o : test/smtest/%.c | $(OUT_DIR)
