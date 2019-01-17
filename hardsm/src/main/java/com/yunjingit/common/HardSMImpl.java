@@ -1,5 +1,6 @@
 package com.yunjingit.common;
 
+import com.yunjingit.common.Sm.KeyPair;
 import java.util.Arrays;
 import com.sun.jna.Native;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -16,7 +17,7 @@ public class HardSMImpl implements HardSM {
     private byte[] normal_buf;
     private byte[] large_buf;
 
-    HardSMImpl() {
+    public HardSMImpl() {
         this.solib = (CSMApi) Native.loadLibrary("yjsmwst", CSMApi.class);
         this.normal_buf = new byte[NORMAL_BUF_SIZE];
         this.large_buf = new byte[LARGE_BUF_SIZE];
@@ -174,6 +175,173 @@ public class HardSMImpl implements HardSM {
         } catch (InvalidProtocolBufferException e) {
             throw new ProtobufError(e);
         }
+    }
+
+    @Override
+    public String apiGenerateKey(int device_index, int pipe_index) throws SMException {
+        try {
+            int i = this.solib.api_generate_key(device_index, pipe_index, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public KeyPair apiGenerateKeyPair(int device_index, int pipe_index) throws SMException {
+        try {
+            int i = this.solib.api_generate_keypair(device_index, pipe_index, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getKeyPair();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public byte[] apiEncrypt(int device_index, int pipe_index, String hex_key, String hex_iv, byte[] data)
+        throws SMException {
+        try {
+            int i = this.solib.api_encrypt(device_index, pipe_index, hex_key, hex_iv,
+                data, data.length, this.large_buf);
+            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getBytesValue().getValue().toByteArray();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public byte[] apiDecrypt(int device_index, int pipe_index, String hex_key, String hex_iv, byte[] data)
+        throws SMException {
+        try {
+            int i = this.solib.api_decrypt(device_index, pipe_index, hex_key, hex_iv,
+                data, data.length, this.large_buf);
+            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getBytesValue().getValue().toByteArray();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public void apiEncryptInit(int device_index, int pipe_index, String hex_key, String hex_iv)
+        throws SMException {
+        try {
+            int i = this.solib.api_encrypt_init(device_index, pipe_index, hex_key, hex_iv, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public byte[] apiEncryptUpdate(int device_index, int pipe_index, byte[] data)
+        throws SMException {
+        try {
+            int i = this.solib.api_encrypt_update(device_index, pipe_index, data, data.length, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getBytesValue().getValue().toByteArray();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public byte[] apiEncryptFinal(int device_index, int pipe_index, byte[] data)
+        throws SMException {
+        try {
+            int i = this.solib.api_encrypt_final(device_index, pipe_index, data, data.length, this.large_buf);
+            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getBytesValue().getValue().toByteArray();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public void apiDecryptInit(int device_index, int pipe_index, String hex_key, String hex_iv)
+        throws SMException {
+        try {
+            int i = this.solib.api_decrypt_init(device_index, pipe_index, hex_key, hex_iv, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public byte[] apiDecryptUpdate(int device_index, int pipe_index, byte[] data)
+        throws SMException {
+        try {
+            int i = this.solib.api_decrypt_update(device_index, pipe_index, data, data.length, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getBytesValue().getValue().toByteArray();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public byte[] apiDecryptFinal(int device_index, int pipe_index, byte[] data)
+        throws SMException {
+        try {
+            int i = this.solib.api_decrypt_final(device_index, pipe_index, data, data.length, this.large_buf);
+            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getBytesValue().getValue().toByteArray();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public String apiSign(int device_index, int pipe_index, String hex_key, String hex_data)
+        throws SMException {
+        try {
+            int i = this.solib.api_sign(device_index, pipe_index, hex_key, hex_data, this.large_buf);
+            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public int apiVerify(int device_index, int pipe_index, String hex_key, String hex_data, String hex_signature)
+        throws SMException {
+            try {
+                int i = this.solib.api_verify(device_index, pipe_index, hex_key,
+                    hex_data, hex_signature, this.large_buf);
+                byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+                Sm.Response response = Sm.Response.parseFrom(bs);
+                this.parseResponse(response);
+                return response.getIntValue().getValue();
+            } catch (InvalidProtocolBufferException e) {
+                throw new ProtobufError(e);
+            }
     }
 
     private void parseResponse(Sm.Response response) throws SMException {

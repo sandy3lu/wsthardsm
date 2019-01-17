@@ -2,9 +2,14 @@ package com.yunjingit.common;
 
 import com.yunjingit.common.Sm.CtxInfo;
 import com.yunjingit.common.Sm.DevStatus;
+import com.yunjingit.common.test.TestContext;
 
 public class SMTool {
-    public static void main( String[] args ) throws SMException {
+    public static void main( String[] args ) {
+        new TestContext().testAllCases();
+    }
+
+    static void test() throws SMException {
         HardSM hardSM = new HardSMImpl();
         hardSM.apiInit();
         System.out.println(hardSM.apiPrintContext(true));
@@ -46,7 +51,7 @@ public class SMTool {
         System.out.println("index: " + devStatus.getIndex());
         System.out.println("opened: " + devStatus.getOpened());
         System.out.println("logged_in: " + devStatus.getLoggedIn());
-        System.out.println("pipes_count: " + devStatus.getFreePipesCount());
+        System.out.println("pipes_count: " + devStatus.getPipesCount());
         System.out.println("free_pipes_count: " + devStatus.getFreePipesCount());
         System.out.println("secret_key_count: " + devStatus.getSecretKeyCount());
         System.out.println("public_key_count: " + devStatus.getPublicKeyCount());
