@@ -33,6 +33,11 @@ public class SMTool {
         SMTool.testSectionDigest(hardSM, index, 0, "0123456701234567012345670123456701234567012345670123456701234567");
         SMTool.testSectionDigest(hardSM, index, 31, "0123456701234567012345670123456701234567012345670123456701234567");
 
+        SMTool.testRandom(hardSM, index, 0, 1);
+        SMTool.testRandom(hardSM, index, 0, 128);
+        SMTool.testRandom(hardSM, index, 31, 1);
+        SMTool.testRandom(hardSM, index, 31, 128);
+
         hardSM.apiLogoutDevice(index);
     }
 
@@ -57,5 +62,9 @@ public class SMTool {
         hardSM.apiDigestUpdate(deviceIndex, pipeIndex, data.getBytes());
         hardSM.apiDigestUpdate(deviceIndex, pipeIndex, data.getBytes());
         System.out.println(hardSM.apiDigestFinal(deviceIndex, pipeIndex, data.getBytes()));
+    }
+
+    static void testRandom(HardSM hardSM, int deviceIndex, int pipeIndex, int length) throws SMException {
+        System.out.println(hardSM.apiRandom(deviceIndex, pipeIndex, length));
     }
 }

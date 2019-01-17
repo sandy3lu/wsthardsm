@@ -166,8 +166,8 @@ public class HardSMImpl implements HardSM {
     @Override
     public String apiRandom(int device_index, int pipe_index, int length) throws SMException {
         try {
-            int i = this.solib.api_random(device_index, pipe_index, length, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            int i = this.solib.api_random(device_index, pipe_index, length, this.large_buf);
+            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getStrValue().getValue();
