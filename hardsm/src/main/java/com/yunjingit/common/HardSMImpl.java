@@ -114,28 +114,66 @@ public class HardSMImpl implements HardSM {
     }
 
     @Override
-    public String apiDigest(int device_index, int pipe_index, byte[] data) {
-        return null;
+    public String apiDigest(int device_index, int pipe_index, byte[] data) throws SMException {
+        try {
+            int i = this.solib.api_digest(device_index, pipe_index, data, data.length, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
     }
 
     @Override
-    public void apiDigestInit(int device_index, int pipe_index) {
-
+    public void apiDigestInit(int device_index, int pipe_index) throws SMException {
+        try {
+            int i = this.solib.api_digest_init(device_index, pipe_index, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
     }
 
     @Override
-    public void apiDigestUpdate(int device_index, int pipe_index, byte[] data) {
-
+    public void apiDigestUpdate(int device_index, int pipe_index, byte[] data) throws SMException {
+        try {
+            int i = this.solib.api_digest_update(device_index, pipe_index, data, data.length, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
     }
 
     @Override
-    public String apiDigestFinal(int device_index, int pipe_index, byte[] data) {
-        return null;
+    public String apiDigestFinal(int device_index, int pipe_index, byte[] data) throws SMException {
+        try {
+            int i = this.solib.api_digest_final(device_index, pipe_index, data, data.length, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
     }
 
     @Override
-    public String apiRandom(int device_index, int pipe_index, int length) {
-        return null;
+    public String apiRandom(int device_index, int pipe_index, int length) throws SMException {
+        try {
+            int i = this.solib.api_random(device_index, pipe_index, length, this.normal_buf);
+            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
     }
 
     private void parseResponse(Sm.Response response) throws SMException {

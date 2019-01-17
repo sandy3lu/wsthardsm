@@ -21,13 +21,13 @@ public interface HardSM {
     void apiProtectKey(boolean flag) throws SMException;
 
 
-    String apiDigest(int device_index, int pipe_index, byte[] data);
+    String apiDigest(int device_index, int pipe_index, byte[] data) throws SMException;
 
-    void apiDigestInit(int device_index, int pipe_index);
+    void apiDigestInit(int device_index, int pipe_index) throws SMException;
 
-    void apiDigestUpdate(int device_index, int pipe_index, byte[] data);
+    void apiDigestUpdate(int device_index, int pipe_index, byte[] data) throws SMException;
 
-    String apiDigestFinal(int device_index, int pipe_index, byte[] data);
+    String apiDigestFinal(int device_index, int pipe_index, byte[] data) throws SMException;
 
-    String apiRandom(int device_index, int pipe_index, int length);
+    String apiRandom(int device_index, int pipe_index, int length) throws SMException;
 }
