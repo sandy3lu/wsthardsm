@@ -23,7 +23,7 @@ public class HardSMImpl implements HardSM {
         File file = null;
         try {
             file = new ResourceUtil().loadLibraryFromJar("/libyjsmwst.so");
-            this.solib = (CSMApi) Native.loadLibrary(file.getAbsolutePath(), CSMApi.class);
+            this.solib = Native.load(file.getAbsolutePath(), CSMApi.class);
         } catch (Exception e) {
             throw new FailedLoadLibError(e);
         } finally {

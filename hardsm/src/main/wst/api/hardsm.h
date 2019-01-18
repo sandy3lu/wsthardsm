@@ -21,7 +21,7 @@ int api_final(uint8_t *out);
 
 /* 输出上下文信息至字符串缓冲区
  * int verbose: 0 表示输出简要信息，1 表示输出详细信息 */
- // return: StrValue
+// return: StrValue
 int api_print_context(int verbose, uint8_t *out);
 
 /* 获取上下文信息结构体，其中包括检测到的设备数目 */
@@ -35,7 +35,7 @@ int api_ctx_info(uint8_t *out);
 int api_login_device(int device_index, const char *pin_code, uint8_t *out);
 
 /* 登出设备，并释放设备的相关资源 */
- // return: None
+// return: None
 int api_logout_device(int device_index, uint8_t *out);
 
 /* 获取设备实时状态信息 */
@@ -46,7 +46,7 @@ int api_device_status(int device_index, uint8_t *out);
  * 但从加密卡导出对称密钥，可以选择保护或者不保护。若选择保护对称密钥，则对称密钥导出时加密，导入时被解密。
  * 调用本 API 可以设置全局开关，设定是否对导出或者导入的密钥进行保护。
  * int flag: true 表示进行保护，false 表示不予保护 */
- // return: None
+// return: None
 int api_protect_key(int flag, uint8_t *out);
 
 

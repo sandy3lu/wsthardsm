@@ -4,9 +4,7 @@ import com.yunjingit.common.Sm.CtxInfo;
 import com.yunjingit.common.Sm.DevStatus;
 
 public class SMTool {
-    public static void main( String[] args ) throws SMException {
-//        new TestContext().testAllCases();
-        SMTool.test();
+    public static void main(String[] args) {
     }
 
     static void test() throws SMException {
