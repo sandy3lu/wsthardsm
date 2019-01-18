@@ -2,10 +2,14 @@ package com.yunjingit.common.test;
 
 import com.yunjingit.common.HardSM;
 import com.yunjingit.common.HardSMImpl;
+import com.yunjingit.common.SMException;
 import com.yunjingit.common.Sm.CtxInfo;
 
 public class TestContext {
     private HardSM hardSM = new HardSMImpl();
+
+    public TestContext() throws SMException {
+    }
 
     public void testAllCases() {
         this.testGetCtxInfoBeforeInit();
@@ -47,9 +51,6 @@ public class TestContext {
         }
     }
 
-    /**
-     * Final is idempotent, so can call final any times no matter it is initialized or not.
-     */
     private void testInitFinalOverAgain() {
         this.testInitFinal();
         this.testInitMultiFinal();
@@ -93,7 +94,7 @@ public class TestContext {
 
     private void testLoginLogoutOverAgain(int deviceIndex, String pinCode) {
         this.testLoginLogout(deviceIndex, pinCode);
-        this.testLoginMultiLogout(deviceIndex, pinCode);
-        this.testLoginLogout(deviceIndex, pinCode);
+//        this.testLoginMultiLogout(deviceIndex, pinCode);
+//        this.testLoginLogout(deviceIndex, pinCode);
     }
 }

@@ -2,11 +2,11 @@ package com.yunjingit.common;
 
 import com.yunjingit.common.Sm.CtxInfo;
 import com.yunjingit.common.Sm.DevStatus;
-import com.yunjingit.common.test.TestContext;
 
 public class SMTool {
-    public static void main( String[] args ) {
-        new TestContext().testAllCases();
+    public static void main( String[] args ) throws SMException {
+//        new TestContext().testAllCases();
+        SMTool.test();
     }
 
     static void test() throws SMException {

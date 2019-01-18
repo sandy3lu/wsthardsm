@@ -1,6 +1,8 @@
 package com.yunjingit.common;
 
 import com.yunjingit.common.Sm.KeyPair;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import com.sun.jna.Native;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -17,8 +19,18 @@ public class HardSMImpl implements HardSM {
     private byte[] normal_buf;
     private byte[] large_buf;
 
-    public HardSMImpl() {
-        this.solib = (CSMApi) Native.loadLibrary("yjsmwst", CSMApi.class);
+    public HardSMImpl() throws SMException {
+        File file = null;
+        try {
+            file = new ResourceUtil().loadLibraryFromJar("/libyjsmwst.so");
+            this.solib = (CSMApi) Native.loadLibrary(file.getAbsolutePath(), CSMApi.class);
+        } catch (Exception e) {
+            throw new FailedLoadLibError(e);
+        } finally {
+            if (null != file) {
+                file.delete();
+            }
+        }
         this.normal_buf = new byte[NORMAL_BUF_SIZE];
         this.large_buf = new byte[LARGE_BUF_SIZE];
     }
