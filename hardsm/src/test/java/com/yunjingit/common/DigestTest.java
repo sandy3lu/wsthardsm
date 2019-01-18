@@ -1,8 +1,7 @@
 package com.yunjingit.common;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class DigestTest {
     private HardSM hardSM;
@@ -20,7 +19,6 @@ public class DigestTest {
     @Test
     public void testDigestOk() throws SMException {
         for (int i = 0; i < this.deviceCount; i++) {
-            assertEquals(this.dataLen1HexDigest, this.hardSM.apiDigest(i, 0, this.dataLen1.getBytes()));
             assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 0, this.dataAbc.getBytes()));
             assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, -1, this.dataAbc.getBytes()));
             assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 31, this.dataAbc.getBytes()));
@@ -31,27 +29,38 @@ public class DigestTest {
 
     @Test(expected = NullPointerException.class)
     public void testDigestNull() throws SMException {
-        if (this.deviceCount <= 0) return;
-        this.hardSM.apiDigest(this.deviceCount - 1, 0, null);
+        for (int i = 0; i < this.deviceCount; i++) {
+            this.hardSM.apiDigest(i, 0, null);
+        }
     }
 
     @Test(expected = SMException.class)
     public void testDigestEmpty() throws SMException {
-        if (this.deviceCount <= 0) return;
-        this.hardSM.apiDigest(this.deviceCount - 1, 0, "".getBytes());
+        for (int i = 0; i < this.deviceCount; i++) {
+            this.hardSM.apiDigest(i, 0, "".getBytes());
+        }
+    }
+
+    @Test
+    public void testDigesLen1() throws SMException {
+        for (int i = 0; i < this.deviceCount; i++) {
+            assertEquals(this.dataLen1HexDigest, this.hardSM.apiDigest(i, 0, this.dataLen1.getBytes()));
+        }
     }
 
     @Test
     public void testDigestVeryLong() throws SMException {
-        if (this.deviceCount <= 0) return;
-        String str64x64 = new String(new char[64]).replace("\0", this.dataAbcHexDigest);
-        this.hardSM.apiDigest(this.deviceCount - 1, 0, str64x64.getBytes());
+        for (int i = 0; i < this.deviceCount; i++) {
+            String str64x64 = new String(new char[64]).replace("\0", this.dataAbcHexDigest);
+            this.hardSM.apiDigest(i, 0, str64x64.getBytes());
+        }
     }
 
     @Test
     public void testDigestVeryVeryLong() throws SMException {
-        if (this.deviceCount <= 0) return;
-        String str64x64x1024 = new String(new char[64 * 1024]).replace("\0", this.dataAbcHexDigest);
-        this.hardSM.apiDigest(this.deviceCount - 1, 0, str64x64x1024.getBytes());
+        for (int i = 0; i < this.deviceCount; i++) {
+            String str64x64x1024 = new String(new char[64 * 1024]).replace("\0", this.dataAbcHexDigest);
+            this.hardSM.apiDigest(i, 0, str64x64x1024.getBytes());
+        }
     }
 }
