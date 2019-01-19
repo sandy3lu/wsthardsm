@@ -10,7 +10,7 @@ import com.yunjingit.common.Sm.CtxInfo;
 import com.yunjingit.common.Sm.DevStatus;
 
 /**
- * HardSMImpl is not thread safety, different thread should use there own HardSMImpl instance
+ * HardSMImpl is thread safety, but different threads should use there own HardSMImpl instance
  */
 public class HardSMImpl implements HardSM {
     private static final int NORMAL_BUF_SIZE = 256;

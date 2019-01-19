@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({DigestTest.class, RandomTest.class})
+@Suite.SuiteClasses({DigestTest.class, RandomTest.class, SymTest.class, AsymTest.class})
 public class SMTest {
     static int deviceCount;
     static HardSM hardSM;

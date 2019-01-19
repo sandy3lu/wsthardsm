@@ -29,7 +29,8 @@ ldconfig
 
 # 生成打包文件
 mvn package
-make
+# 生成打包文件，并跳过单元测试
+mvn package -Dmaven.test.skip=true 
 
 # 运行
 java -jar target/hardsm-0.0.1-SNAPSHOT.jar

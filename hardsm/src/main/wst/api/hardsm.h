@@ -132,15 +132,15 @@ int api_decrypt_update(int device_index, int pipe_index, char *data, int data_le
 int api_decrypt_final(int device_index, int pipe_index, char *data, int data_len, uint8_t *out);
 
 /* 数字签名
- * char *hex_key: 私钥 hex 编码
- * char *hex_data: 原文数据 hex 编码 */
+ * char *hex_key: 私钥 hex 编码，64 字符长度
+ * char *hex_data: 原文数据 hex 编码，64 字符长度 */
 // return: StrValue，签名值 hex 编码
 int api_sign(int device_index, int pipe_index, char *hex_key, char *hex_data, uint8_t *out);
 
 /* 验签
  * char *hex_key: 公钥 hex 编码
- * char *hex_data: 原文数据 hex 编码
- * char *hex_signature: 签名值 hex 编码 */
+ * char *hex_data: 原文数据 hex 编码，64 字符长度
+ * char *hex_signature: 签名值 hex 编码，128 字符长度 */
 // return: IntValue, 0 表示验签成功，否者验签失败，不同数值代表不同原因
 int api_verify(int device_index, int pipe_index, char *hex_key, char *hex_data, char *hex_signature, uint8_t *out);
 
