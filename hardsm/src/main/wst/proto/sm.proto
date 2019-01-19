@@ -14,6 +14,7 @@ message StrValue {
 
 message BytesValue {
     bytes value = 1;
+    int32 len = 2;
 }
 
 message KeyPair {

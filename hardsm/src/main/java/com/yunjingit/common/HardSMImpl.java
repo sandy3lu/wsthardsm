@@ -14,7 +14,7 @@ import com.yunjingit.common.Sm.DevStatus;
  */
 public class HardSMImpl implements HardSM {
     private static final int NORMAL_BUF_SIZE = 256;
-    private static final int LARGE_BUF_SIZE = 1024 * 32;
+    private static final int LARGE_BUF_SIZE = 1024 * 128 + 128;
     private CSMApi solib;
     private byte[] normal_buf;
     private byte[] large_buf;
@@ -280,7 +280,8 @@ public class HardSMImpl implements HardSM {
             byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
-            return response.getBytesValue().getValue().toByteArray();
+            int valueLen = response.getBytesValue().getLen();
+            return response.getBytesValue().getValue().substring(0, valueLen).toByteArray();
         } catch (InvalidProtocolBufferException e) {
             throw new ProtobufError(e);
         }
@@ -307,7 +308,8 @@ public class HardSMImpl implements HardSM {
             byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
-            return response.getBytesValue().getValue().toByteArray();
+            int valueLen = response.getBytesValue().getLen();
+            return response.getBytesValue().getValue().substring(0, valueLen).toByteArray();
         } catch (InvalidProtocolBufferException e) {
             throw new ProtobufError(e);
         }
@@ -321,7 +323,8 @@ public class HardSMImpl implements HardSM {
             byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
-            return response.getBytesValue().getValue().toByteArray();
+            int valueLen = response.getBytesValue().getLen();
+            return response.getBytesValue().getValue().substring(0, valueLen).toByteArray();
         } catch (InvalidProtocolBufferException e) {
             throw new ProtobufError(e);
         }

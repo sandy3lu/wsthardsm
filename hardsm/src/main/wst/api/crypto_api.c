@@ -89,7 +89,7 @@ int api_encrypt(int device_index, int pipe_index, char *hex_key, char *hex_iv, c
     Response response = RESPONSE__INIT;
 
     // Data length greater than 1M is not allowed here
-    if (data_len > 1024 * 1024) return DATA_TOO_LONG;
+    if (data_len > LARGE_BUF_LEN - 64) return DATA_TOO_LONG;
 
     char data_out[LARGE_BUF_LEN] = {0};
     int data_out_len = sizeof(data_out);
@@ -107,7 +107,7 @@ int api_decrypt(int device_index, int pipe_index, char *hex_key, char *hex_iv, c
     Response response = RESPONSE__INIT;
 
     // Data length greater than 1M is not allowed here
-    if (data_len > 1024 * 1024) return DATA_TOO_LONG;
+    if (data_len > LARGE_BUF_LEN - 64) return DATA_TOO_LONG;
 
     char data_out[LARGE_BUF_LEN] = {0};
     int data_out_len = sizeof(data_out);
@@ -181,7 +181,7 @@ int api_encrypt_final(int device_index, int pipe_index, char *data, int data_len
     Response response = RESPONSE__INIT;
 
     // Data length greater than 1M is not allowed here
-    if (data_len > 1024 * 1024) return DATA_TOO_LONG;
+    if (data_len > LARGE_BUF_LEN - 64) return DATA_TOO_LONG;
 
     char data_out[LARGE_BUF_LEN] = {0};
     int data_out_len = sizeof(data_out);
@@ -199,7 +199,7 @@ int api_decrypt_final(int device_index, int pipe_index, char *data, int data_len
     Response response = RESPONSE__INIT;
 
     // Data length greater than 1M is not allowed here
-    if (data_len > 1024 * 1024) return DATA_TOO_LONG;
+    if (data_len > LARGE_BUF_LEN - 64) return DATA_TOO_LONG;
 
     char data_out[LARGE_BUF_LEN] = {0};
     int data_out_len = sizeof(data_out);

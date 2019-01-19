@@ -8,6 +8,7 @@ public class SymTest {
     private int deviceCount;
     private String hexOrigin = "0123456789abcdeffedcba9876543210";
     private String hexKey = "0123456789abcdeffedcba9876543210";
+    private String hexKeyIv = "0123456789abcdeffedcba9876543210";
     private String hexResult = "681edf34d206965e86b3e94f536e4246002a8a4efa863ccad024ac0300bb40d2";
     private byte[] bytesOrigin;
 
@@ -106,4 +107,33 @@ public class SymTest {
             this.hardSM.apiDecrypt(i, 0, this.hexKey, null, "".getBytes());
         }
     }
+
+    @Test
+    public void testEncryptDecryptWithIvOk() throws SMException {
+        if (this.deviceCount < 2) return;
+
+        byte[] encrypted = this.hardSM.apiEncrypt(0, 0, this.hexKey, this.hexKeyIv, this.bytesOrigin);
+        assertNotEquals(this.hexResult, DataTransfer.toHex(encrypted));
+        byte[] decrypted = this.hardSM.apiDecrypt(1, 0, this.hexKey, this.hexKeyIv, encrypted);
+        assertEquals(this.hexOrigin, DataTransfer.toHex(decrypted));
+    }
+
+//    @Test
+//    public void testEncryptInitFinal() throws SMException {
+//        for (int i = 0; i < this.deviceCount; i++) {
+//            this.hardSM.apiEncryptInit(i, 0, this.hexKey, null);
+//            byte[] encrypted = this.hardSM.apiEncryptFinal(0, 0, this.bytesOrigin);
+//            System.out.println(DataTransfer.toHex(encrypted));
+//            assertEquals(this.hexResult, DataTransfer.toHex(encrypted));
+//        }
+//    }
+
+//    @Test
+//    public void testDecryptInitFinal() throws SMException {
+//        for (int i = 0; i < this.deviceCount; i++) {
+//            this.hardSM.apiDecryptInit(i, 0, this.hexKey, null);
+//            byte[] decrypted = this.hardSM.apiDecryptFinal(0, 0, DataTransfer.fromHex(this.hexResult));
+//            assertEquals(this.hexOrigin, DataTransfer.toHex(decrypted));
+//        }
+//    }
 }

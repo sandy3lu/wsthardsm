@@ -81,6 +81,7 @@ update-protoc:
 	cd proto && protoc-c --c_out=. sm.proto
 	cd proto && sed 's/<protobuf-c\/protobuf-c.h>/"protobuf-c.h"/g' sm.pb-c.h >sm.pb-c.h.tmp
 	cd proto && mv sm.pb-c.h.tmp sm.pb-c.h
+	cd proto && protoc --java_out=. sm.proto
 
 clean:
 	- rm -rf build

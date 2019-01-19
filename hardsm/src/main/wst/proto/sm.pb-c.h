@@ -67,10 +67,12 @@ struct  _BytesValue
   ProtobufCMessage base;
   protobuf_c_boolean has_value;
   ProtobufCBinaryData value;
+  protobuf_c_boolean has_len;
+  int32_t len;
 };
 #define BYTES_VALUE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&bytes_value__descriptor) \
-    , 0,{0,NULL} }
+    , 0,{0,NULL}, 0,0 }
 
 
 struct  _KeyPair

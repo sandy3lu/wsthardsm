@@ -1382,6 +1382,11 @@ public final class Sm {
      * <code>bytes value = 1;</code>
      */
     com.google.protobuf.ByteString getValue();
+
+    /**
+     * <code>int32 len = 2;</code>
+     */
+    int getLen();
   }
   /**
    * Protobuf type {@code BytesValue}
@@ -1396,6 +1401,7 @@ public final class Sm {
     }
     private BytesValue() {
       value_ = com.google.protobuf.ByteString.EMPTY;
+      len_ = 0;
     }
 
     @java.lang.Override
@@ -1426,6 +1432,11 @@ public final class Sm {
             case 10: {
 
               value_ = input.readBytes();
+              break;
+            }
+            case 16: {
+
+              len_ = input.readInt32();
               break;
             }
           }
@@ -1460,6 +1471,15 @@ public final class Sm {
       return value_;
     }
 
+    public static final int LEN_FIELD_NUMBER = 2;
+    private int len_;
+    /**
+     * <code>int32 len = 2;</code>
+     */
+    public int getLen() {
+      return len_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -1475,6 +1495,9 @@ public final class Sm {
       if (!value_.isEmpty()) {
         output.writeBytes(1, value_);
       }
+      if (len_ != 0) {
+        output.writeInt32(2, len_);
+      }
     }
 
     public int getSerializedSize() {
@@ -1485,6 +1508,10 @@ public final class Sm {
       if (!value_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, value_);
+      }
+      if (len_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, len_);
       }
       memoizedSize = size;
       return size;
@@ -1504,6 +1531,8 @@ public final class Sm {
       boolean result = true;
       result = result && getValue()
           .equals(other.getValue());
+      result = result && (getLen()
+          == other.getLen());
       return result;
     }
 
@@ -1516,6 +1545,8 @@ public final class Sm {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + getValue().hashCode();
+      hash = (37 * hash) + LEN_FIELD_NUMBER;
+      hash = (53 * hash) + getLen();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1636,6 +1667,8 @@ public final class Sm {
         super.clear();
         value_ = com.google.protobuf.ByteString.EMPTY;
 
+        len_ = 0;
+
         return this;
       }
 
@@ -1659,6 +1692,7 @@ public final class Sm {
       public Sm.BytesValue buildPartial() {
         Sm.BytesValue result = new Sm.BytesValue(this);
         result.value_ = value_;
+        result.len_ = len_;
         onBuilt();
         return result;
       }
@@ -1702,6 +1736,9 @@ public final class Sm {
         if (other == Sm.BytesValue.getDefaultInstance()) return this;
         if (other.getValue() != com.google.protobuf.ByteString.EMPTY) {
           setValue(other.getValue());
+        }
+        if (other.getLen() != 0) {
+          setLen(other.getLen());
         }
         onChanged();
         return this;
@@ -1754,6 +1791,32 @@ public final class Sm {
       public Builder clearValue() {
         
         value_ = getDefaultInstance().getValue();
+        onChanged();
+        return this;
+      }
+
+      private int len_ ;
+      /**
+       * <code>int32 len = 2;</code>
+       */
+      public int getLen() {
+        return len_;
+      }
+      /**
+       * <code>int32 len = 2;</code>
+       */
+      public Builder setLen(int value) {
+        
+        len_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 len = 2;</code>
+       */
+      public Builder clearLen() {
+        
+        len_ = 0;
         onChanged();
         return this;
       }
@@ -6042,23 +6105,23 @@ public final class Sm {
     java.lang.String[] descriptorData = {
       "\n\010sm.proto\"\032\n\tBoolValue\022\r\n\005value\030\001 \001(\010\"\031" +
       "\n\010IntValue\022\r\n\005value\030\001 \001(\005\"\031\n\010StrValue\022\r\n" +
-      "\005value\030\001 \001(\t\"\033\n\nBytesValue\022\r\n\005value\030\001 \001(" +
-      "\014\"2\n\007KeyPair\022\022\n\npublic_key\030\001 \001(\t\022\023\n\013priv" +
-      "ate_key\030\002 \001(\t\"\273\001\n\tDevStatus\022\r\n\005index\030\001 \001" +
-      "(\005\022\016\n\006opened\030\002 \001(\010\022\021\n\tlogged_in\030\003 \001(\010\022\023\n" +
-      "\013pipes_count\030\004 \001(\005\022\030\n\020free_pipes_count\030\005" +
-      " \001(\005\022\030\n\020secret_key_count\030\006 \001(\005\022\030\n\020public" +
-      "_key_count\030\007 \001(\005\022\031\n\021private_key_count\030\010 " +
-      "\001(\005\"I\n\007CtxInfo\022\023\n\013protect_key\030\001 \001(\010\022\024\n\014d",
-      "evice_count\030\002 \001(\005\022\023\n\013api_version\030\003 \001(\t\"\224" +
-      "\002\n\010Response\022\014\n\004code\030\001 \001(\005\022\013\n\003msg\030\002 \001(\t\022 " +
-      "\n\nbool_value\030\004 \001(\0132\n.BoolValueH\000\022\036\n\tint_" +
-      "value\030\005 \001(\0132\t.IntValueH\000\022\036\n\tstr_value\030\006 " +
-      "\001(\0132\t.StrValueH\000\022\"\n\013bytes_value\030\007 \001(\0132\013." +
-      "BytesValueH\000\022\034\n\010key_pair\030\010 \001(\0132\010.KeyPair" +
-      "H\000\022#\n\rdevice_status\030\t \001(\0132\n.DevStatusH\000\022" +
-      "\034\n\010ctx_info\030\n \001(\0132\010.CtxInfoH\000B\006\n\004datab\006p" +
-      "roto3"
+      "\005value\030\001 \001(\t\"(\n\nBytesValue\022\r\n\005value\030\001 \001(" +
+      "\014\022\013\n\003len\030\002 \001(\005\"2\n\007KeyPair\022\022\n\npublic_key\030" +
+      "\001 \001(\t\022\023\n\013private_key\030\002 \001(\t\"\273\001\n\tDevStatus" +
+      "\022\r\n\005index\030\001 \001(\005\022\016\n\006opened\030\002 \001(\010\022\021\n\tlogge" +
+      "d_in\030\003 \001(\010\022\023\n\013pipes_count\030\004 \001(\005\022\030\n\020free_" +
+      "pipes_count\030\005 \001(\005\022\030\n\020secret_key_count\030\006 " +
+      "\001(\005\022\030\n\020public_key_count\030\007 \001(\005\022\031\n\021private" +
+      "_key_count\030\010 \001(\005\"I\n\007CtxInfo\022\023\n\013protect_k",
+      "ey\030\001 \001(\010\022\024\n\014device_count\030\002 \001(\005\022\023\n\013api_ve" +
+      "rsion\030\003 \001(\t\"\224\002\n\010Response\022\014\n\004code\030\001 \001(\005\022\013" +
+      "\n\003msg\030\002 \001(\t\022 \n\nbool_value\030\004 \001(\0132\n.BoolVa" +
+      "lueH\000\022\036\n\tint_value\030\005 \001(\0132\t.IntValueH\000\022\036\n" +
+      "\tstr_value\030\006 \001(\0132\t.StrValueH\000\022\"\n\013bytes_v" +
+      "alue\030\007 \001(\0132\013.BytesValueH\000\022\034\n\010key_pair\030\010 " +
+      "\001(\0132\010.KeyPairH\000\022#\n\rdevice_status\030\t \001(\0132\n" +
+      ".DevStatusH\000\022\034\n\010ctx_info\030\n \001(\0132\010.CtxInfo" +
+      "H\000B\006\n\004datab\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6095,7 +6158,7 @@ public final class Sm {
     internal_static_BytesValue_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_BytesValue_descriptor,
-        new java.lang.String[] { "Value", });
+        new java.lang.String[] { "Value", "Len", });
     internal_static_KeyPair_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_KeyPair_fieldAccessorTable = new

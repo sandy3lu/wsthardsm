@@ -61,7 +61,7 @@ public class DigestTest {
     @Test
     public void testDigestVeryVeryLongOk() throws SMException {
         for (int i = 0; i < this.deviceCount; i++) {
-            String str64x64x1024 = new String(new char[64 * 1024]).replace("\0", this.dataAbcHexDigest);
+            String str64x64x1024 = new String(new char[512]).replace("\0", this.dataAbcHexDigest);
             this.hardSM.apiDigest(i, 0, str64x64x1024.getBytes());
         }
     }

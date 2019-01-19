@@ -90,6 +90,8 @@ int bytes_response(Response *response, char *data, int data_len, uint8_t *out) {
     bytes_value.value.len = data_len;
     bytes_value.value.data = (uint8_t *)data;
     bytes_value.has_value = true;
+    bytes_value.len = data_len;
+    bytes_value.has_len = true;
 
     response->data_case = RESPONSE__DATA_BYTES_VALUE;
     response->bytes_value = &bytes_value;

@@ -18,6 +18,7 @@ static void test_generate_key();
 static void test_generate_keypair();
 static void test_encrypt();
 static void test_decrypt();
+static void test_encrypt_init_final();
 
 
 void test_crypto() {
@@ -28,6 +29,7 @@ void test_crypto() {
     test_generate_keypair();
     test_encrypt();
     test_decrypt();
+    test_encrypt_init_final();
 }
 
 static void test_digest() {
@@ -124,5 +126,22 @@ static void test_decrypt() {
     check_response(response);
     BytesValue *bytes = (BytesValue *)response->bytes_value;
     printf("decrypt result: %s\n", bytes->value.data);
+    response__free_unpacked(response, NULL);
+}
+
+static void test_encrypt_init_final() {
+    uint8_t out[1024 * 32]  ={0};
+
+    int l = api_encrypt_init(0, 0, hex_secret, NULL, out);
+    Response *response = response__unpack(NULL, l, out);
+    check_response(response);
+    response__free_unpacked(response, NULL);
+
+    l = api_encrypt_final(0, 0, origin_data, strlen(origin_data), out);
+    response = response__unpack(NULL, l, out);
+    check_response(response);
+
+    BytesValue *bytes = (BytesValue *)response->bytes_value;
+    print_bytes(bytes);
     response__free_unpacked(response, NULL);
 }
