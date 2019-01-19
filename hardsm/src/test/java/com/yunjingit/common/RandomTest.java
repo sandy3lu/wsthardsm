@@ -25,7 +25,7 @@ public class RandomTest {
     }
 
     @Test(expected = SMException.class)
-    public void testRandom0() throws SMException {
+    public void testRandom0Error() throws SMException {
         for (int i = 0; i < this.deviceCount; i++) {
             this.hardSM.apiRandom(i, 0, 0);
         }
@@ -46,7 +46,7 @@ public class RandomTest {
     }
 
     @Test(expected = SMException.class)
-    public void testRandom1025() throws SMException {
+    public void testRandom1025Error() throws SMException {
         for (int i = 0; i < this.deviceCount; i++) {
             assertEquals(1025 * 2, this.hardSM.apiRandom(i, 0, 1025).length());
         }

@@ -68,9 +68,9 @@ int api_digest(int device_index, int pipe_index, char *data, int data_len, uint8
 
 /* 当数据量比较庞大，比如计算一个文件的摘要值时，推荐采用分步计算方法，分为三个步骤:
  * 1. 初始化，申请计算资源
- * 2. 0 次或者多次迭代更新，不断载入新的原文数据
+ * 2. 0 次或者多次迭代更新，不断载入新的原文数据，每次更新数据库块长度必须是 32 整数倍
  * 3. 输出最终的摘要值
- * 倘若要多次分步计算摘要，可以 final 后直接 update，而不用重复 init，节省步骤 */
+ * 不能在 final 之后直接 update */
  // return: None
 int api_digest_init(int device_index, int pipe_index, uint8_t *out);
 // return: None
