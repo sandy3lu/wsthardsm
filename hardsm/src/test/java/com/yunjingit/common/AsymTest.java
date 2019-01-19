@@ -65,11 +65,32 @@ public class AsymTest {
         for (int i = 0; i < this.deviceCount; i++) {
             String originData = "0123456701234567012345670123456701234567012345670123456701234567";
             KeyPair keyPair = this.hardSM.apiGenerateKeyPair(i, 0);
-            String signature = this.hardSM.apiSign(i, 0, keyPair.getPrivateKey(), originData);
-            signature = "0123456701234567012345670123456701234567012345670123456701234567"
+            String signature = "0123456701234567012345670123456701234567012345670123456701234567"
                 + "0123456701234567012345670123456701234567012345670123456701234567";
             int result = this.hardSM.apiVerify(i, 0, keyPair.getPublicKey(), originData, signature);
             assertNotEquals(0, result);
         }
+    }
+
+    @Test
+    public void testASignBVerifyOk() throws SMException {
+        if (this.deviceCount < 2) return;
+
+        String originData = "0123456701234567012345670123456701234567012345670123456701234567";
+        KeyPair keyPair = this.hardSM.apiGenerateKeyPair(0, 0);
+        String signature = this.hardSM.apiSign(1, 0, keyPair.getPrivateKey(), originData);
+        int result = this.hardSM.apiVerify(0, 0, keyPair.getPublicKey(), originData, signature);
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void testBSignAVerifyOk() throws SMException {
+        if (this.deviceCount < 2) return;
+
+        String originData = "0123456701234567012345670123456701234567012345670123456701234567";
+        KeyPair keyPair = this.hardSM.apiGenerateKeyPair(1, 0);
+        String signature = this.hardSM.apiSign(0, 0, keyPair.getPrivateKey(), originData);
+        int result = this.hardSM.apiVerify(1, 0, keyPair.getPublicKey(), originData, signature);
+        assertEquals(0, result);
     }
 }
