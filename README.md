@@ -17,24 +17,27 @@
 ```
 
 ### 开发环境准备
+1. docker 容器
 开发过程中，需要编译 C 语言程序，链接加密卡链接库，链接 protobuf 等，也需要 java 和 maven 环境，因此采用 docker 构建开发环境镜像，
 docker-compose up -d 命令即可启动开发使用的容器，进入容器进行日常开发即可。
 
-
 ### 生产环境
 ```
-# 部署动态链接库，将 resources 目录中的 so 文件拷贝至 /usr/lib 目录下并生效
+# 部署动态链接库，将 resources 目录中的 libsmwst* 文件拷贝至 /usr/lib 目录下并生效
 cp resources/*.so /usr/lib
 ldconfig
 
-# 生成打包文件
+# 执行单元测试
+mvn test
+
+# 生成打包文件并执行单元测试
 mvn package
+
 # 生成打包文件，并跳过单元测试
 mvn package -Dmaven.test.skip=true 
 
 # 运行
 java -jar target/hardsm-0.0.1-SNAPSHOT.jar
-
 ```  
 
 

@@ -13,7 +13,7 @@
 
 
 #define BUF_LEN  256
-#define LARGE_BUF_LEN  1024 * 1024 + 64
+#define LARGE_BUF_LEN  1024 * 64 + 64
 
 
 int api_digest(int device_index, int pipe_index, char *data, int data_len, uint8_t *out) {
