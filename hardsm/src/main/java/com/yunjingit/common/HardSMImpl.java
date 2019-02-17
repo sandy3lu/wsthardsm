@@ -1,13 +1,12 @@
 package com.yunjingit.common;
 
-import com.yunjingit.common.Sm.KeyPair;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-import com.sun.jna.Native;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sun.jna.Native;
 import com.yunjingit.common.Sm.CtxInfo;
 import com.yunjingit.common.Sm.DevStatus;
+import com.yunjingit.common.Sm.KeyPair;
 
 /**
  * HardSMImpl is thread safety, but different threads should use there own HardSMImpl instance
