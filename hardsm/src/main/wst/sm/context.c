@@ -519,7 +519,8 @@ static int check_context_status(int device_index) {
 }
 
 static int hash_index(int index, int count) {
-    assert(count > 0);
+    if (count <= 0) return 0;
+    
     index = abs(index);
     index %= count;
     return index;
