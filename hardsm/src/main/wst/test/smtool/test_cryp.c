@@ -357,13 +357,15 @@ static void digest_alot() {
     uint8_t out[1024 * 32]  ={0};
     int errors = 0;
     int counts = 10000;
+    int index = 0;
 
     long start_timestamp = current_timestamp();
 
     int i;
     for (i = 0; i < counts; i++) {
+        ++index;
         char *data = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc";
-        int l = api_digest(0, 0, data, strlen(data), out);
+        int l = api_digest(index * 11 % 8, index * 13 % 32, data, strlen(data), out);
         Response *response = response__unpack(NULL, l, out);
         if (response->code != 0) errors++;
         response__free_unpacked(response, NULL);
@@ -381,12 +383,14 @@ static void random_alot() {
     uint8_t out[1024 * 32]  ={0};
     int errors = 0;
     int counts = 10000;
+    int index = 0;
 
     long start_timestamp = current_timestamp();
 
     int i;
     for (i = 0; i < 10000; i++) {
-        int l = api_random(0, 0, 16, out);
+        ++index;
+        int l = api_random(index * 11 % 8, index * 13 % 32, 16, out);
         Response *response = response__unpack(NULL, l, out);
         if (response->code != 0) errors++;
         response__free_unpacked(response, NULL);
@@ -404,12 +408,14 @@ static void encrypt_alot() {
     uint8_t out[1024 * 32]  ={0};
     int errors = 0;
     int counts = 10000;
+    int index = 0;
 
     long start_timestamp = current_timestamp();
 
     int i;
     for (i = 0; i < 10000; i++) {
-        int l = api_encrypt(0, 0, hex_secret, NULL, origin_data_anylen, strlen(origin_data_anylen), out);
+        ++index;
+        int l = api_encrypt(index * 11 % 8, index * 13 % 32, hex_secret, NULL, origin_data_anylen, strlen(origin_data_anylen), out);
         Response *response = response__unpack(NULL, l, out);
         if (response->code != 0) errors++;
         response__free_unpacked(response, NULL);
@@ -427,6 +433,7 @@ static void decrypt_alot() {
     uint8_t out[1024 * 32]  ={0};
     int errors = 0;
     int counts = 10000;
+    int index = 0;
 
     long start_timestamp = current_timestamp();
 
@@ -436,7 +443,8 @@ static void decrypt_alot() {
         int data_len = sizeof(out);
         from_hex(data, &data_len, encrypt_result_anylen);
 
-        int l = api_decrypt(0, 0, hex_secret, NULL, data, data_len, out);
+        ++index;
+        int l = api_decrypt(index * 11 % 8, index * 13 % 32, hex_secret, NULL, data, data_len, out);
         Response *response = response__unpack(NULL, l, out);
         if (response->code != 0) errors++;
         response__free_unpacked(response, NULL);
@@ -454,6 +462,7 @@ static void sign_alot() {
     uint8_t out[1024 * 32]  ={0};
     int errors = 0;
     int counts = 10000;
+    int index = 0;
 
     char private_key[256] = {0};
     char public_key[256] = {0};
@@ -471,7 +480,8 @@ static void sign_alot() {
 
     int i;
     for (i = 0; i < 10000; i++) {
-        l = api_sign(0, 0, private_key, origin_data, out);
+        ++index;
+        l = api_sign(index * 11 % 8, index * 13 % 32, private_key, origin_data, out);
         response = response__unpack(NULL, l, out);
         if (response->code != 0) errors++;
         response__free_unpacked(response, NULL);
@@ -489,6 +499,7 @@ static void verify_alot() {
     uint8_t out[1024 * 32]  ={0};
     int errors = 0;
     int counts = 10000;
+    int index = 0;
 
     char private_key[256] = {0};
     char public_key[256] = {0};
@@ -516,7 +527,8 @@ static void verify_alot() {
 
     int i;
     for (i = 0; i < 10000; i++) {
-        l = api_verify(0, 0, public_key, origin_data, signature, out);
+        ++index;
+        l = api_verify(index * 11 % 8, index * 13 % 32, public_key, origin_data, signature, out);
         response = response__unpack(NULL, l, out);
         if (response->code != 0) errors++;
         response__free_unpacked(response, NULL);
