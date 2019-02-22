@@ -14,6 +14,13 @@ static const char *origin_data = "0123456701234567012345670123456701234567012345
 static const char *encrypt_result = "eefb0602800038b355744473abe2a292eefb0602800038b355744473abe2a292eefb0602800038b355744473abe2a292eefb0602800038b355744473abe2a2921bda5859da7534a80121a1e79b859431";
 
 
+static long current_timestamp() {
+    struct timeval te;
+    gettimeofday(&te, NULL); // get current time
+    long milliseconds = te.tv_sec * 1000L + te.tv_usec / 1000; // calculate milliseconds
+    return milliseconds;
+}
+
 static void test_digest() {
     const char *data = "abc";
     char out[1024] = {0};
@@ -189,21 +196,29 @@ static void test_section_decrypt() {
 }
 
 static void test_sign_verify() {
-    const char *hex_private = "559ba1bfa6cdb845388f0fa07cc714376840fc92cf777ee264673fdd8cf99ce5";
-    const char *hex_public = "f8b4732c9dac6e007f1615bdb52344050046df7c4d6ea14c4cd9912aea82c593b90bb3a6927b681bdfe3590f0edef1df10350fb03070cd4dcdaec38b1bb2366b";
     const char *data = origin_data;
 
-    char signature[130] = {0};
+    char public_key[1024] = {0};
+    char private_key[1024] = {0};
+    int public_key_len = sizeof(public_key);
+    int private_key_len = sizeof(private_key);
+    char signature[256] = {0};
     int signature_len = sizeof(signature);
 
-    int error_code = ctx_ecc_sign(0, 0, hex_private, data, signature, signature_len);
+    int error_code = ctx_generate_keypair(0, 0, public_key, public_key_len, private_key, private_key_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    error_code = ctx_ecc_sign(0, 0, private_key, data, signature, signature_len);
     if (error_code != YERR_SUCCESS) {
         print_error(error_code);
         return;
     }
 
     int verify_result = 0;
-    error_code = ctx_ecc_verify(0, 0, hex_public, &verify_result, data, signature);
+    error_code = ctx_ecc_verify(0, 0, public_key, &verify_result, data, signature);
     if (error_code != YERR_SUCCESS) {
         print_error(error_code);
         return;
@@ -212,6 +227,104 @@ static void test_sign_verify() {
     if (0 != verify_result) {
         print_error(verify_result);
     }
+}
+
+static void test_digest_alot() {
+    int errors = 0;
+    int counts = 10000;
+
+    long start_timestamp = current_timestamp();
+
+    int i;
+    for (i = 0; i < counts; i++) {
+        const char *data = "abc";
+        char out[1024] = {0};
+        int out_len = sizeof(out);
+        int error_code = ctx_digest(0, 0, data, strlen(data), out, out_len);
+        if (error_code != YERR_SUCCESS) errors++;
+    }
+
+    long stop_timestamp = current_timestamp();
+
+    printf("digest performance test result: \n");
+    printf("errors: %d\n", errors);
+    printf("counts: %d\n", counts);
+    printf("time: %ld\n", stop_timestamp - start_timestamp);
+}
+
+static void test_sign_alot() {
+    const char *data = origin_data;
+    int errors = 0;
+    int counts = 10000;
+
+    char public_key[1024] = {0};
+    char private_key[1024] = {0};
+    int public_key_len = sizeof(public_key);
+    int private_key_len = sizeof(private_key);
+    char signature[256] = {0};
+    int signature_len = sizeof(signature);
+
+    int error_code = ctx_generate_keypair(0, 0, public_key, public_key_len, private_key, private_key_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    long start_timestamp = current_timestamp();
+
+    int i;
+    for (i = 0; i < counts; i++) {
+        error_code = ctx_ecc_sign(0, 0, private_key, data, signature, signature_len);
+        if (error_code != YERR_SUCCESS) errors++;
+    }
+
+    long stop_timestamp = current_timestamp();
+
+    printf("sign performance test result: \n");
+    printf("errors: %d\n", errors);
+    printf("counts: %d\n", counts);
+    printf("time: %ld\n", stop_timestamp - start_timestamp);
+}
+
+static void test_verify_alot() {
+    const char *data = origin_data;
+    int errors = 0;
+    int counts = 10000;
+
+    char public_key[1024] = {0};
+    char private_key[1024] = {0};
+    int public_key_len = sizeof(public_key);
+    int private_key_len = sizeof(private_key);
+    char signature[256] = {0};
+    int signature_len = sizeof(signature);
+
+    int error_code = ctx_generate_keypair(0, 0, public_key, public_key_len, private_key, private_key_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    error_code = ctx_ecc_sign(0, 0, private_key, data, signature, signature_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    long start_timestamp = current_timestamp();
+
+    int i;
+    for (i = 0; i < counts; i++) {
+        int verify_result = 0;
+        error_code = ctx_ecc_verify(0, 0, public_key, &verify_result, data, signature);
+        if (error_code != YERR_SUCCESS || 0 != verify_result) errors++;
+    }
+
+    long stop_timestamp = current_timestamp();
+
+    printf("sign performance test result: \n");
+    printf("errors: %d\n", errors);
+    printf("counts: %d\n", counts);
+    printf("time: %ld\n", stop_timestamp - start_timestamp);
 }
 
 void test_crypto() {
@@ -223,4 +336,8 @@ void test_crypto() {
     test_section_encrypt();
     test_section_decrypt();
     test_sign_verify();
+
+    test_digest_alot();
+    test_sign_alot();
+    test_verify_alot();
 }
