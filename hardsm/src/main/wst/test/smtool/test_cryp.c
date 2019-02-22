@@ -26,6 +26,7 @@ static void test_encrypt_section();
 static void test_decrypt_section();
 static void test_encrypt_section_modlen();
 static void test_decrypt_section_modlen();
+static void test_sign_verify();
 
 
 void test_crypto() {
@@ -42,6 +43,7 @@ void test_crypto() {
     test_decrypt_section();
     test_encrypt_section_modlen();
     test_decrypt_section_modlen();
+    test_sign_verify();
 }
 
 static void test_digest() {
@@ -300,5 +302,38 @@ static void test_decrypt_section_modlen() {
 
     BytesValue *bytes = (BytesValue *)response->bytes_value;
     printf("decrypt result: %s\n", bytes->value.data);
+    response__free_unpacked(response, NULL);
+}
+
+static void test_sign_verify() {
+    uint8_t out[1024 * 32] = {0};
+    char private_key[256] = {0};
+    char public_key[256] = {0};
+    char signature[256] = {0};
+
+    // generate key pair
+    int l = api_generate_keypair(0, 0, out);
+    Response *response = response__unpack(NULL, l, out);
+    check_response(response);
+    KeyPair *key_pair = (KeyPair *)response->key_pair;
+    strncpy(private_key, key_pair->private_key, sizeof(private_key));
+    strncpy(public_key, key_pair->public_key, sizeof(public_key));
+    response__free_unpacked(response, NULL);
+
+    // sign
+    l = api_sign(0, 0, private_key, origin_data, out);
+    response = response__unpack(NULL, l, out);
+    check_response(response);
+    StrValue *str_value = (StrValue *)response->str_value;
+    printf("signature: %s\n", str_value->value);
+    strncpy(signature, str_value->value, sizeof(signature));
+    response__free_unpacked(response, NULL);
+
+    // verify
+    l = api_verify(0, 0, public_key, origin_data, signature, out);
+    response = response__unpack(NULL, l, out);
+    check_response(response);
+    IntValue *int_value = (IntValue *)response->int_value;
+    printf("verify result: %d\n", int_value->value);
     response__free_unpacked(response, NULL);
 }

@@ -12,6 +12,7 @@ static SM_ALGORITHM g_mac_algorithm;
 static SM_ALGORITHM g_sign_algorithm;
 static SM_ALGORITHM g_verify_algorithm;
 
+
 static void init_mac_algorithm();
 static void init_hash_algorithm();
 static void init_sign_algorithm();
