@@ -6,22 +6,12 @@
 #include "smtool.h"
 
 
-static void test_init();
-static void test_final();
-static void test_print_context();
-static void test_login_device();
-static void test_logout_device();
-static void test_device_status();
-static int test_ctx_info();
-static void test_protect_key(int flag);
-
-
-void test_ctx() {
+void test_ctx(char *pincode) {
     test_init();
 
     test_ctx_info();
 
-    test_login_device();
+    test_login_device(pincode);
 
     test_device_status(0);
     test_crypto();
@@ -32,7 +22,7 @@ void test_ctx() {
     test_final();
 }
 
-static void test_init() {
+void test_init() {
     uint8_t out[1024 * 32]  ={0};
 
     int l = api_init(out);
@@ -41,7 +31,7 @@ static void test_init() {
     response__free_unpacked(response, NULL);
 }
 
-static void test_final() {
+void test_final() {
     uint8_t out[1024 * 32]  ={0};
     int l = api_final(out);
     Response *response = response__unpack(NULL, l, out);
@@ -49,7 +39,7 @@ static void test_final() {
     response__free_unpacked(response, NULL);
 }
 
-static void test_print_context() {
+void test_print_context() {
     uint8_t out[1024 * 32]  ={0};
 
     int l = api_print_context(true, out);
@@ -60,16 +50,34 @@ static void test_print_context() {
     response__free_unpacked(response, NULL);
 }
 
-static void test_login_device() {
+void test_open_device(int device_index) {
     uint8_t out[1024 * 32]  ={0};
 
-    int l = api_login_device(0, "11111111", out);
+    int l = api_open_device(device_index, out);
     Response *response = response__unpack(NULL, l, out);
     check_response(response);
     response__free_unpacked(response, NULL);
 }
 
-static void test_logout_device() {
+void test_close_device(int device_index) {
+    uint8_t out[1024 * 32]  ={0};
+
+    int l = api_close_device(device_index, out);
+    Response *response = response__unpack(NULL, l, out);
+//    check_response(response);
+    response__free_unpacked(response, NULL);
+}
+
+void test_login_device(char *pincode) {
+    uint8_t out[1024 * 32]  ={0};
+
+    int l = api_login_device(0, pincode, out);
+    Response *response = response__unpack(NULL, l, out);
+    check_response(response);
+    response__free_unpacked(response, NULL);
+}
+
+void test_logout_device() {
     uint8_t out[1024 * 32]  ={0};
 
     int l = api_logout_device(0, out);
@@ -78,7 +86,7 @@ static void test_logout_device() {
     response__free_unpacked(response, NULL);
 }
 
-static void test_device_status(int device_index) {
+void test_device_status(int device_index) {
     uint8_t out[1024 * 32]  ={0};
 
     int l = api_device_status(device_index, out);
@@ -89,7 +97,7 @@ static void test_device_status(int device_index) {
     response__free_unpacked(response, NULL);
 }
 
-static int test_ctx_info() {
+int test_ctx_info() {
     uint8_t out[1024 * 32]  ={0};
 
     int l = api_ctx_info(out);
@@ -102,7 +110,7 @@ static int test_ctx_info() {
     return device_count;
 }
 
-static void test_protect_key(int flag) {
+void test_protect_key(int flag) {
     uint8_t out[1024 * 32]  ={0};
 
     int l = api_protect_key(flag, out);

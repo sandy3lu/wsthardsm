@@ -26,6 +26,7 @@ void init_error_string() {
     MSGS[IV_LENGTH_INVALID] = "iv length invalid";
     MSGS[BLOCK_LENGTH_INVALID] = "block length invalid";
     MSGS[DATA_TOO_LONG] = "data length too long";
+    MSGS[PINCODE_LEN_ERROR] = "pin code length must be 8";
 }
 
 char *get_error_string(int code) {

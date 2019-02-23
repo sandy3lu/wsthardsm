@@ -24,6 +24,17 @@ void print_keypair(KeyPair *key_pair);
 void print_bytes(BytesValue *bytes);
 void test_crypto();
 
+void test_init();
+void test_final();
+void test_print_context();
+void test_open_device(int device_index);
+void test_close_device(int device_index);
+void test_login_device(char *pincode);
+void test_logout_device();
+void test_device_status();
+int test_ctx_info();
+void test_protect_key(int flag);
+
 
 #ifdef __cplusplus
 }

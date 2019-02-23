@@ -237,7 +237,60 @@ bool ctx_get_protect_key_flag() {
     return g_crypto_context.protect_key;
 }
 
+int ctx_build_auth(int device_index, char *pincode) {
+    int error_code = check_device_index(device_index);
+    if (error_code != YERR_SUCCESS) return error_code;
 
+    DeviceContext *device_context = &(g_crypto_context.device_list[device_index]);
+    if (NULL == device_context->h_device) {
+        return DEVICE_NOT_OPENED;
+    }
+
+    if (strlen(pincode) != 8) return PINCODE_LEN_ERROR;
+
+    char verifyPublicKey[1024] = {0};
+    char wrapPublicKey[1024] = {0};
+    int verifyPublicKeyLen = sizeof(verifyPublicKey);
+    int wrapPublicKeyLen = sizeof(wrapPublicKey);
+
+    error_code = SM_BuildAuthDev(device_context->h_device, (PSM_BYTE)pincode, strlen(pincode), 2,
+                                 (PSM_BYTE)verifyPublicKey, (PSM_WORD)&verifyPublicKeyLen,
+                                 (PSM_BYTE)wrapPublicKey, (PSM_WORD)&wrapPublicKeyLen);
+
+    if (error_code != YERR_SUCCESS) {
+        return error_code;
+    }
+
+    char hex[1024] = {0};
+    to_hex(hex, sizeof(hex), verifyPublicKey, verifyPublicKeyLen);
+    LOG_INFO("verifyPublicKey: %s\n", hex);
+
+    to_hex(hex, sizeof(hex), wrapPublicKey, wrapPublicKeyLen);
+    LOG_INFO("wrapPublicKey: %s\n", hex);
+
+    return YERR_SUCCESS;
+}
+
+int ctx_backup_auth(int index, char *pincode) {
+    int error_code = check_context_status(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
+    if (strlen(pincode) != 8) return PINCODE_LEN_ERROR;
+
+    printf("change usb key, and press any key to continue.\n");
+    getchar();
+
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(index, 0, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+
+    error_code = SM_BackupAuthDev(h_pipe, pincode, strlen(pincode));
+    if (error_code != YERR_SUCCESS) {
+        return error_code;
+    }
+
+    return YERR_SUCCESS;
+}
 
 
 int ctx_digest(int device_index, int pipe_index, const char *data, int data_len, char *out, int out_len) {
@@ -520,7 +573,7 @@ static int check_context_status(int device_index) {
 
 static int hash_index(int index, int count) {
     if (count <= 0) return 0;
-    
+
     index = abs(index);
     index %= count;
     return index;

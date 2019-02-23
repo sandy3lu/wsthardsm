@@ -229,33 +229,33 @@ int crypto_ecc_verify(SM_PIPE_HANDLE h_pipe, const char *hex_key, int *verify_re
 /**
  * TODO
  */
-int crypto_ecc_encrypt(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key, const char *hex_data, char *hex_out, int hex_out_len) {
-    int hex_data_len = strlen(hex_data);
-    if (hex_data_len / 2 > MAX_ECC_ENCRYPT_LEN) {
-        return BLOCK_LENGTH_INVALID;
-    }
-    if (hex_out_len <= MAX_ECC_ENCRYPT_LEN * 4) {
-        return BUFSIZE_TOO_SMALL;
-    }
-
-    SM_BLOB_KEY blob_key;
-    int error_code = make_blob_key(&blob_key, ph_key);
-    if (error_code != YERR_SUCCESS) return error_code;
-
-    char data[MAX_ECC_ENCRYPT_LEN] = {0};
-    int data_len = 0;
-    from_hex(data, &data_len, hex_data);
-    assert(data_len <= sizeof(data));
-
-    SM_BLOB_ECCCIPHER st_ecc_cipher;
-    memset(&st_ecc_cipher, 0, sizeof(SM_BLOB_ECCCIPHER));
-
-    error_code = SM_ECCEncrypt(h_pipe, &blob_key, &g_encrypt_algorithm,
-                               (PSM_BYTE)data, (SM_UINT)data_len, &st_ecc_cipher);
-    if (error_code != YERR_SUCCESS) return error_code;
-
-    return YERR_SUCCESS;
-}
+//int crypto_ecc_encrypt(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key, const char *hex_data, char *hex_out, int hex_out_len) {
+//    int hex_data_len = strlen(hex_data);
+//    if (hex_data_len / 2 > MAX_ECC_ENCRYPT_LEN) {
+//        return BLOCK_LENGTH_INVALID;
+//    }
+//    if (hex_out_len <= MAX_ECC_ENCRYPT_LEN * 4) {
+//        return BUFSIZE_TOO_SMALL;
+//    }
+//
+//    SM_BLOB_KEY blob_key;
+//    int error_code = make_blob_key(&blob_key, ph_key);
+//    if (error_code != YERR_SUCCESS) return error_code;
+//
+//    char data[MAX_ECC_ENCRYPT_LEN] = {0};
+//    int data_len = 0;
+//    from_hex(data, &data_len, hex_data);
+//    assert(data_len <= sizeof(data));
+//
+//    SM_BLOB_ECCCIPHER st_ecc_cipher;
+//    memset(&st_ecc_cipher, 0, sizeof(SM_BLOB_ECCCIPHER));
+//
+//    error_code = SM_ECCEncrypt(h_pipe, &blob_key, &g_encrypt_algorithm,
+//                               (PSM_BYTE)data, (SM_UINT)data_len, &st_ecc_cipher);
+//    if (error_code != YERR_SUCCESS) return error_code;
+//
+//    return YERR_SUCCESS;
+//}
 
 static void init_hash_algorithm() {
     memset(&g_hash_algorithm, 0, sizeof(SM_ALGORITHM));
@@ -345,52 +345,52 @@ static int make_crypt_algorithm(SM_ALGORITHM *algorithm, const char *hex_iv) {
  * uiCheckDataLen: 4 bytes
  * "uiSessionKeyLen uiCipherDataLen uiCheckDataLen hexStream"
  **/
-static int formatEccCipher(PSM_BLOB_ECCCIPHER pst_ecc_cipher, char *hex_out, int hex_out_len) {
-    PSM_BLOB_ECCCIPHER cipher = pst_ecc_cipher;
-    int total_len = (cipher->uiSessionKeyLen + cipher->uiCipherDataLen + cipher->uiCheckDataLen) * 2 + 16;
-    if (hex_out_len < total_len) {
-        return BUFSIZE_TOO_SMALL;
-    }
-
-    int delta = sprintf(hex_out, "%4d %4d %4d ",
-                        cipher->uiSessionKeyLen, cipher->uiCipherDataLen, cipher->uiCheckDataLen);
-    hex_out += delta;
-    to_hex(hex_out, hex_out_len - delta, cipher->pbyData,
-           cipher->uiSessionKeyLen + cipher->uiCipherDataLen + cipher->uiCheckDataLen);
-
-    return YERR_SUCCESS;
-}
-
-static char *nex_chip(char *str, char *chip, int chip_len, char sep) {
-    char *cipher = str;
-
-    while (cipher != NULL && (*cipher) != sep) cipher++;
-    while ((*cipher) == sep) cipher++;
-
-    if (cipher - str > chip_len) return NULL;
-
-    strncpy(chip, str, cipher - str);
-
-    return cipher;
-}
-
-static int loadEccCipher(PSM_BLOB_ECCCIPHER pst_ecc_cipher, char *hex_data) {
-    char chip[4] = {0};
-
-    char *cursor = hex_data;
-
-    cursor = nex_chip(cursor, chip, sizeof(chip), ' ');
-    if (NULL == cursor) return YERR_FORMAT_ERROR;
-    pst_ecc_cipher->uiSessionKeyLen = atoi(chip);
-
-    cursor = nex_chip(cursor, chip, sizeof(chip), ' ');
-    if (NULL == cursor) return YERR_FORMAT_ERROR;
-    pst_ecc_cipher->uiCipherDataLen = atoi(chip);
-
-    cursor = nex_chip(cursor, chip, sizeof(chip), ' ');
-    if (NULL == cursor) return YERR_FORMAT_ERROR;
-    pst_ecc_cipher->uiCheckDataLen = atoi(chip);
-
-    // TODO
-    return YERR_SUCCESS;
-}
+//static int formatEccCipher(PSM_BLOB_ECCCIPHER pst_ecc_cipher, char *hex_out, int hex_out_len) {
+//    PSM_BLOB_ECCCIPHER cipher = pst_ecc_cipher;
+//    int total_len = (cipher->uiSessionKeyLen + cipher->uiCipherDataLen + cipher->uiCheckDataLen) * 2 + 16;
+//    if (hex_out_len < total_len) {
+//        return BUFSIZE_TOO_SMALL;
+//    }
+//
+//    int delta = sprintf(hex_out, "%4d %4d %4d ",
+//                        cipher->uiSessionKeyLen, cipher->uiCipherDataLen, cipher->uiCheckDataLen);
+//    hex_out += delta;
+//    to_hex(hex_out, hex_out_len - delta, cipher->pbyData,
+//           cipher->uiSessionKeyLen + cipher->uiCipherDataLen + cipher->uiCheckDataLen);
+//
+//    return YERR_SUCCESS;
+//}
+//
+//static char *nex_chip(char *str, char *chip, int chip_len, char sep) {
+//    char *cipher = str;
+//
+//    while (cipher != NULL && (*cipher) != sep) cipher++;
+//    while ((*cipher) == sep) cipher++;
+//
+//    if (cipher - str > chip_len) return NULL;
+//
+//    strncpy(chip, str, cipher - str);
+//
+//    return cipher;
+//}
+//
+//static int loadEccCipher(PSM_BLOB_ECCCIPHER pst_ecc_cipher, char *hex_data) {
+//    char chip[4] = {0};
+//
+//    char *cursor = hex_data;
+//
+//    cursor = nex_chip(cursor, chip, sizeof(chip), ' ');
+//    if (NULL == cursor) return YERR_FORMAT_ERROR;
+//    pst_ecc_cipher->uiSessionKeyLen = atoi(chip);
+//
+//    cursor = nex_chip(cursor, chip, sizeof(chip), ' ');
+//    if (NULL == cursor) return YERR_FORMAT_ERROR;
+//    pst_ecc_cipher->uiCipherDataLen = atoi(chip);
+//
+//    cursor = nex_chip(cursor, chip, sizeof(chip), ' ');
+//    if (NULL == cursor) return YERR_FORMAT_ERROR;
+//    pst_ecc_cipher->uiCheckDataLen = atoi(chip);
+//
+//    // TODO
+//    return YERR_SUCCESS;
+//}

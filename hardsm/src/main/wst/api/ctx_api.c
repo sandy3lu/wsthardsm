@@ -45,6 +45,36 @@ int api_print_context(bool verbose, uint8_t *out) {
     return str_response(&response, buf, out);
 }
 
+int api_open_device(int device_index, uint8_t *out) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+
+    error_code = ctx_open_device(device_index);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    error_code = ctx_check_device(device_index);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    return empty_response(&response, out);
+
+fail:
+    ctx_free_device(device_index);
+    return fail_response(&response, error_code, out);
+}
+
+int api_close_device(int device_index, uint8_t *out) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+
+    error_code = ctx_free_device(device_index);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    return empty_response(&response, out);
+
+fail:
+    return fail_response(&response, error_code, out);
+}
+
 int api_login_device(int device_index, const char *pin_code, uint8_t *out) {
     int error_code = YERR_SUCCESS;
     Response response = RESPONSE__INIT;
@@ -99,4 +129,30 @@ int api_protect_key(int flag, uint8_t *out) {
     Response response = RESPONSE__INIT;
     ctx_set_protect_key_flag(flag);
     return empty_response(&response, out);
+}
+
+int api_build_auth(int device_index, char *pincode, uint8_t *out) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+
+    error_code = ctx_build_auth(device_index, pincode);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    return empty_response(&response, out);
+
+fail:
+    return fail_response(&response, error_code, out);
+}
+
+int api_backup_auth(int device_index, char *pincode, uint8_t *out) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+
+    error_code = ctx_backup_auth(device_index, pincode);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    return empty_response(&response, out);
+
+fail:
+    return fail_response(&response, error_code, out);
 }

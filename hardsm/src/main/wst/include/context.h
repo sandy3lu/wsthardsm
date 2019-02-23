@@ -77,6 +77,11 @@ void ctx_set_protect_key_flag(bool flag);
 
 bool ctx_get_protect_key_flag();
 
+/* 在登录加密卡的情况下，重置加密卡配备密钥 */
+int ctx_build_auth(int index, char *pincode);
+
+/* 在登录加密卡的情况下，备份加密卡配备密钥 */
+int ctx_backup_auth(int index, char *pincode);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                      算法

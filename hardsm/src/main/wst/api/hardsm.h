@@ -28,6 +28,10 @@ int api_print_context(int verbose, uint8_t *out);
 // return: CtxInfo
 int api_ctx_info(uint8_t *out);
 
+int api_open_device(int device_index, uint8_t *out);
+
+int api_close_device(int device_index, uint8_t *out);
+
 /* 登录设备，并申请设备的相关资源。采用独占方式登录，即若一个进程登录设备后，其他进程便无法再登录。
  * int device_index: 设备编号，从 0 开始索引
  * const char *pin_code: 设备密钥口令 */
@@ -49,6 +53,11 @@ int api_device_status(int device_index, uint8_t *out);
 // return: None
 int api_protect_key(int flag, uint8_t *out);
 
+/* 在登录加密卡的情况下，重置加密卡配备密钥 */
+int api_build_auth(int device_index, char *pincode, uint8_t *out);
+
+/* 在登录加密卡的情况下，备份加密卡配备密钥 */
+int api_backup_auth(int device_index, char *pincode, uint8_t *out);
 
 
 /* 以下算法皆为加密算法 API，所有 API 都需要通过 device_index 和 pipe_index 声明使用的加密卡资源。一台主机可最多插入

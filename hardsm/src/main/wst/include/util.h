@@ -39,6 +39,7 @@ typedef int bool;
 #define IV_LENGTH_INVALID           611
 #define BLOCK_LENGTH_INVALID        612
 #define DATA_TOO_LONG               613
+#define PINCODE_LEN_ERROR           614
 
 
 enum LOG_LEVEL {
