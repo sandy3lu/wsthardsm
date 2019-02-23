@@ -4,6 +4,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.Date;
+import com.yunjingit.common.Sm.KeyPair;
+
 public class DigestTest {
     private HardSM hardSM;
     private int deviceCount;
@@ -161,5 +164,32 @@ public class DigestTest {
             this.hardSM.apiDigestUpdate(i, 0, this.data07.substring(1).getBytes());
             this.hardSM.apiDigestFinal(i, 0, this.data07.getBytes());
         }
+    }
+
+    @Test
+    public void testDigestAlot() throws SMException {
+        int counts = 10000;
+        int errors = 0;
+        Date start = new Date();
+
+        for (int i = 0; i < counts; i++) {
+            try {
+                if (!this.dataAbcHexDigest.equals(this.hardSM.apiDigest(0, 0, this.dataAbc.getBytes()))) {
+                    errors++;
+                }
+            } catch (SMException e) {
+                errors++;
+            }
+        }
+
+        Date stop = new Date();
+        long timeCost = stop.getTime() - start.getTime();
+        float rate = (float) counts / timeCost * 1000;
+
+        System.out.println("Digest performance result:");
+        System.out.println("counts: " + counts);
+        System.out.println("errors: " + errors);
+        System.out.println("time: " + timeCost);
+        System.out.println("rate: " + rate);
     }
 }
