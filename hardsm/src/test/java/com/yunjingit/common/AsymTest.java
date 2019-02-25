@@ -167,7 +167,7 @@ public class AsymTest {
         KeyPair keyPair = this.hardSM.apiGenerateKeyPair(0, 0);
 
         int counts = 10000;
-        int threadCounts = 4;
+        int threadCounts = this.hardSM.getThreads();
         AtomicInteger errors = new AtomicInteger(0);
         ArrayList<Thread> threads = new ArrayList<>();
         final Exception[] exception = {null};
@@ -217,7 +217,7 @@ public class AsymTest {
         String signature = this.hardSM.apiSign(0, 0, keyPair.getPrivateKey(), originData);
 
         int counts = 10000;
-        int threadCounts = 4;
+        int threadCounts = this.hardSM.getThreads();
         AtomicInteger errors = new AtomicInteger(0);
         ArrayList<Thread> threads = new ArrayList<>();
         final Exception[] exception = {null};
@@ -239,7 +239,6 @@ public class AsymTest {
                         exception[0] = e;
                     }
                 }
-
                 Date stop = new Date();
                 costs[pipeIndex] = stop.getTime() - start.getTime();
             });

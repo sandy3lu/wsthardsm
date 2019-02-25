@@ -9,16 +9,22 @@ import com.yunjingit.common.Sm.DevStatus;
 import com.yunjingit.common.Sm.KeyPair;
 
 /**
- * HardSMImpl is thread safety, but different threads should use there own HardSMImpl instance
+ *HarmSMImpl 并不完全是线程安全的，使用过程中需要注意如下事项:
+ * 1. 一个进程应该只实例化一个 HardSMImpl 对象，否者结果是未定义的.
+ * 2. 实例化 HardSMImpl 时，应如实传入调用方的最大线程数量，线程数量不应该比加密卡的剩余非对称密钥容量多，否者加密卡将没有足够的资源处理
+ * 并发，会报错 NOT ENOUGH RESOURCE.
+ * 3. 在调用加密算法时，device_index * 32 + pipe_index 与传入的线程数量是一一对应的，调用方也应该将
+ * device_index * 32 + pipe_index 与调用方的线程数量进行对应，否者很可能导致未定义的并发错误.
  */
 public class HardSMImpl implements HardSM {
     private static final int NORMAL_BUF_SIZE = 256;
     private static final int LARGE_BUF_SIZE = 1024 * 128 + 128;
     private CSMApi solib;
-    private byte[] normal_buf;
-    private byte[] large_buf;
+    private byte[][] normalBuf;
+    private byte[][] largeBuf;
+    private int threads;
 
-    public HardSMImpl() throws SMException {
+    public HardSMImpl(int threads) throws SMException {
         File file = null;
         try {
             file = new ResourceUtil().loadLibraryFromJar("/libyjsmwst.so");
@@ -30,14 +36,31 @@ public class HardSMImpl implements HardSM {
                 file.delete();
             }
         }
-        this.normal_buf = new byte[NORMAL_BUF_SIZE];
-        this.large_buf = new byte[LARGE_BUF_SIZE];
+        this.normalBuf = new byte[threads][];
+        this.largeBuf = new byte[threads][];
+
+        for (int i = 0; i < this.normalBuf.length; i++) {
+            this.normalBuf[i] = new byte[NORMAL_BUF_SIZE];
+        }
+
+        for (int i = 0; i < this.largeBuf.length; i++) {
+            this.largeBuf[i] = new byte[LARGE_BUF_SIZE];
+        }
+
+        this.threads = threads;
     }
 
+    @Override
+    public int getThreads() {
+        return this.threads;
+    }
+
+    @Override
     public void apiInit() throws SMException {
         try {
-            int i = this.solib.api_init(this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(0, 0);
+            int i = this.solib.api_init(buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -45,10 +68,12 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public void apiFinal() throws SMException {
         try {
-            int i = this.solib.api_final(this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(0, 0);
+            int i = this.solib.api_final(buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -56,10 +81,12 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public String apiPrintContext(boolean verbose) throws SMException {
         try {
-            int i = this.solib.api_print_context(verbose? 1 : 0, this.large_buf);
-            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            byte[] buf = this.getLargeBuf(0, 0);
+            int i = this.solib.api_print_context(verbose? 1 : 0, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getStrValue().getValue();
@@ -68,10 +95,12 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public CtxInfo apiCtxInfo() throws SMException {
         try {
-            int i = this.solib.api_ctx_info(this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(0, 0);
+            int i = this.solib.api_ctx_info(buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getCtxInfo();
@@ -80,10 +109,12 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public void apiLoginDevice(int deviceIndex, String pinCode) throws SMException {
         try {
-            int i = this.solib.api_login_device(deviceIndex, pinCode, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(deviceIndex, 0);
+            int i = this.solib.api_login_device(deviceIndex, pinCode, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -91,10 +122,12 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public void apiLogoutDevice(int deviceIndex) throws SMException {
         try {
-            int i = this.solib.api_logout_device(deviceIndex, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(deviceIndex, 0);
+            int i = this.solib.api_logout_device(deviceIndex, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -102,10 +135,12 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public DevStatus apiDeviceStatus(int deviceIndex) throws SMException {
         try {
-            int i = this.solib.api_device_status(deviceIndex, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(deviceIndex, 0);
+            int i = this.solib.api_device_status(deviceIndex, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getDeviceStatus();
@@ -114,10 +149,12 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public void apiProtectKey(boolean flag) throws SMException {
         try {
-            int i = this.solib.api_protect_key(flag? 1 : 0, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(0, 0);
+            int i = this.solib.api_protect_key(flag? 1 : 0, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -128,8 +165,9 @@ public class HardSMImpl implements HardSM {
     @Override
     public String apiDigest(int device_index, int pipe_index, byte[] data) throws SMException {
         try {
-            int i = this.solib.api_digest(device_index, pipe_index, data, data.length, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_digest(device_index, pipe_index, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getStrValue().getValue();
@@ -141,8 +179,9 @@ public class HardSMImpl implements HardSM {
     @Override
     public void apiDigestInit(int device_index, int pipe_index) throws SMException {
         try {
-            int i = this.solib.api_digest_init(device_index, pipe_index, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_digest_init(device_index, pipe_index, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -153,8 +192,9 @@ public class HardSMImpl implements HardSM {
     @Override
     public void apiDigestUpdate(int device_index, int pipe_index, byte[] data) throws SMException {
         try {
-            int i = this.solib.api_digest_update(device_index, pipe_index, data, data.length, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_digest_update(device_index, pipe_index, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -165,8 +205,9 @@ public class HardSMImpl implements HardSM {
     @Override
     public String apiDigestFinal(int device_index, int pipe_index, byte[] data) throws SMException {
         try {
-            int i = this.solib.api_digest_final(device_index, pipe_index, data, data.length, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_digest_final(device_index, pipe_index, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getStrValue().getValue();
@@ -178,8 +219,9 @@ public class HardSMImpl implements HardSM {
     @Override
     public String apiRandom(int device_index, int pipe_index, int length) throws SMException {
         try {
-            int i = this.solib.api_random(device_index, pipe_index, length, this.large_buf);
-            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            byte[] buf = this.getLargeBuf(device_index, pipe_index);
+            int i = this.solib.api_random(device_index, pipe_index, length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getStrValue().getValue();
@@ -191,8 +233,9 @@ public class HardSMImpl implements HardSM {
     @Override
     public String apiGenerateKey(int device_index, int pipe_index) throws SMException {
         try {
-            int i = this.solib.api_generate_key(device_index, pipe_index, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_generate_key(device_index, pipe_index, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getStrValue().getValue();
@@ -204,8 +247,9 @@ public class HardSMImpl implements HardSM {
     @Override
     public KeyPair apiGenerateKeyPair(int device_index, int pipe_index) throws SMException {
         try {
-            int i = this.solib.api_generate_keypair(device_index, pipe_index, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_generate_keypair(device_index, pipe_index, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getKeyPair();
@@ -218,9 +262,9 @@ public class HardSMImpl implements HardSM {
     public byte[] apiEncrypt(int device_index, int pipe_index, String hex_key, String hex_iv, byte[] data)
         throws SMException {
         try {
-            int i = this.solib.api_encrypt(device_index, pipe_index, hex_key, hex_iv,
-                data, data.length, this.large_buf);
-            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            byte[] buf = this.getLargeBuf(device_index, pipe_index);
+            int i = this.solib.api_encrypt(device_index, pipe_index, hex_key, hex_iv, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getBytesValue().getValue().toByteArray();
@@ -233,9 +277,9 @@ public class HardSMImpl implements HardSM {
     public byte[] apiDecrypt(int device_index, int pipe_index, String hex_key, String hex_iv, byte[] data)
         throws SMException {
         try {
-            int i = this.solib.api_decrypt(device_index, pipe_index, hex_key, hex_iv,
-                data, data.length, this.large_buf);
-            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            byte[] buf = this.getLargeBuf(device_index, pipe_index);
+            int i = this.solib.api_decrypt(device_index, pipe_index, hex_key, hex_iv, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getBytesValue().getValue().toByteArray();
@@ -248,8 +292,9 @@ public class HardSMImpl implements HardSM {
     public void apiEncryptInit(int device_index, int pipe_index, String hex_key, String hex_iv)
         throws SMException {
         try {
-            int i = this.solib.api_encrypt_init(device_index, pipe_index, hex_key, hex_iv, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_encrypt_init(device_index, pipe_index, hex_key, hex_iv, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -261,8 +306,9 @@ public class HardSMImpl implements HardSM {
     public byte[] apiEncryptUpdate(int device_index, int pipe_index, byte[] data)
         throws SMException {
         try {
-            int i = this.solib.api_encrypt_update(device_index, pipe_index, data, data.length, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_encrypt_update(device_index, pipe_index, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getBytesValue().getValue().toByteArray();
@@ -275,8 +321,9 @@ public class HardSMImpl implements HardSM {
     public byte[] apiEncryptFinal(int device_index, int pipe_index, byte[] data)
         throws SMException {
         try {
-            int i = this.solib.api_encrypt_final(device_index, pipe_index, data, data.length, this.large_buf);
-            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            byte[] buf = this.getLargeBuf(device_index, pipe_index);
+            int i = this.solib.api_encrypt_final(device_index, pipe_index, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             int valueLen = response.getBytesValue().getLen();
@@ -290,8 +337,9 @@ public class HardSMImpl implements HardSM {
     public void apiDecryptInit(int device_index, int pipe_index, String hex_key, String hex_iv)
         throws SMException {
         try {
-            int i = this.solib.api_decrypt_init(device_index, pipe_index, hex_key, hex_iv, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_decrypt_init(device_index, pipe_index, hex_key, hex_iv, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
         } catch (InvalidProtocolBufferException e) {
@@ -303,8 +351,9 @@ public class HardSMImpl implements HardSM {
     public byte[] apiDecryptUpdate(int device_index, int pipe_index, byte[] data)
         throws SMException {
         try {
-            int i = this.solib.api_decrypt_update(device_index, pipe_index, data, data.length, this.normal_buf);
-            byte[] bs = Arrays.copyOfRange(this.normal_buf, 0, i);
+            byte[] buf = this.getNormalBuf(device_index, pipe_index);
+            int i = this.solib.api_decrypt_update(device_index, pipe_index, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             int valueLen = response.getBytesValue().getLen();
@@ -318,8 +367,9 @@ public class HardSMImpl implements HardSM {
     public byte[] apiDecryptFinal(int device_index, int pipe_index, byte[] data)
         throws SMException {
         try {
-            int i = this.solib.api_decrypt_final(device_index, pipe_index, data, data.length, this.large_buf);
-            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            byte[] buf = this.getLargeBuf(device_index, pipe_index);
+            int i = this.solib.api_decrypt_final(device_index, pipe_index, data, data.length, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             int valueLen = response.getBytesValue().getLen();
@@ -333,8 +383,9 @@ public class HardSMImpl implements HardSM {
     public String apiSign(int device_index, int pipe_index, String hex_key, String hex_data)
         throws SMException {
         try {
-            int i = this.solib.api_sign(device_index, pipe_index, hex_key, hex_data, this.large_buf);
-            byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+            byte[] buf = this.getLargeBuf(device_index, pipe_index);
+            int i = this.solib.api_sign(device_index, pipe_index, hex_key, hex_data, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getStrValue().getValue();
@@ -347,9 +398,9 @@ public class HardSMImpl implements HardSM {
     public int apiVerify(int device_index, int pipe_index, String hex_key, String hex_data, String hex_signature)
         throws SMException {
             try {
-                int i = this.solib.api_verify(device_index, pipe_index, hex_key,
-                    hex_data, hex_signature, this.large_buf);
-                byte[] bs = Arrays.copyOfRange(this.large_buf, 0, i);
+                byte[] buf = this.getLargeBuf(device_index, pipe_index);
+                int i = this.solib.api_verify(device_index, pipe_index, hex_key, hex_data, hex_signature, buf);
+                byte[] bs = Arrays.copyOfRange(buf, 0, i);
                 Sm.Response response = Sm.Response.parseFrom(bs);
                 this.parseResponse(response);
                 return response.getIntValue().getValue();
@@ -362,5 +413,30 @@ public class HardSMImpl implements HardSM {
         if (response.getCode() != 0) {
             throw new SMException(response.getCode(), response.getMsg());
         }
+    }
+
+    private byte[] getNormalBuf(int device_index, int pipe_index) throws SMException {
+        return this.getBuf(device_index, pipe_index, this.normalBuf);
+    }
+
+    private byte[] getLargeBuf(int device_index, int pipe_index) throws SMException {
+        return this.getBuf(device_index, pipe_index, this.largeBuf);
+    }
+
+    private byte[] getBuf(int device_index, int pipe_index, byte[][] bufs) throws SMException {
+        final int INDEX_OUTOF_BOUND = 603;
+        if (device_index < 0 || pipe_index < 0) {
+            throw new SMException(INDEX_OUTOF_BOUND, "index out of bound");
+        }
+        if (pipe_index >= 32) {
+            throw new SMException(INDEX_OUTOF_BOUND, "index out of bound");
+        }
+
+        int index = device_index * 32 + pipe_index;
+        if (index >= this.threads) {
+            throw new SMException(INDEX_OUTOF_BOUND, "index out of bound");
+        }
+
+        return bufs[index];
     }
 }

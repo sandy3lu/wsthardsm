@@ -5,6 +5,8 @@ import com.yunjingit.common.Sm.DevStatus;
 import com.yunjingit.common.Sm.KeyPair;
 
 public interface HardSM {
+    int getThreads();
+
     void apiInit() throws SMException;
 
     void apiFinal() throws SMException;

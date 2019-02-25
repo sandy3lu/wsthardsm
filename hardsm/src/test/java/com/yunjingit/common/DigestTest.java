@@ -7,7 +7,6 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.yunjingit.common.Sm.KeyPair;
 
 public class DigestTest {
     private HardSM hardSM;
@@ -23,14 +22,13 @@ public class DigestTest {
         this.deviceCount = SMTest.deviceCount;
     }
 
+
     @Test
     public void testDigestOk() throws SMException {
         for (int i = 0; i < this.deviceCount; i++) {
             assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 0, this.dataAbc.getBytes()));
-            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, -1, this.dataAbc.getBytes()));
-            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 31, this.dataAbc.getBytes()));
-            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 32, this.dataAbc.getBytes()));
-            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 99999, this.dataAbc.getBytes()));
+            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i,
+                this.hardSM.getThreads() - 1, this.dataAbc.getBytes()));
         }
     }
 
@@ -199,7 +197,7 @@ public class DigestTest {
     @Test
     public void testDigestConcurrence() throws InterruptedException {
         int counts = 10000;
-        int threadCounts = 4;
+        int threadCounts = this.hardSM.getThreads();
         AtomicInteger errors = new AtomicInteger(0);
         ArrayList<Thread> threads = new ArrayList<>();
         final Exception[] exception = {null};
