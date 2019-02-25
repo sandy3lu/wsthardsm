@@ -4,7 +4,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.yunjingit.common.Sm.KeyPair;
 
 public class DigestTest {
@@ -166,6 +168,7 @@ public class DigestTest {
         }
     }
 
+    @Ignore
     @Test
     public void testDigestAlot() throws SMException {
         int counts = 10000;
@@ -191,5 +194,73 @@ public class DigestTest {
         System.out.println("errors: " + errors);
         System.out.println("time: " + timeCost);
         System.out.println("rate: " + rate);
+    }
+
+    @Test
+    public void testDigestConcurrence() throws InterruptedException {
+        int counts = 10000;
+        int threadCounts = 4;
+        AtomicInteger errors = new AtomicInteger(0);
+        ArrayList<Thread> threads = new ArrayList<>();
+        final Exception[] exception = {null};
+        final long[] costs = new long[threadCounts];
+
+        for (int i = 0; i < threadCounts; i++) {
+            int pipeIndex = i;
+
+            Thread t = new Thread(() -> {
+                Date start = new Date();
+
+                for (int j = 0; j < counts; j++) {
+                    try {
+                        if (!dataAbcHexDigest.equals(hardSM.apiDigest(0, pipeIndex, dataAbc.getBytes()))) {
+                            errors.incrementAndGet();
+                        }
+                    } catch (SMException e) {
+                        errors.incrementAndGet();
+                        exception[0] = e;
+                    }
+                }
+
+                Date stop = new Date();
+                costs[pipeIndex] = stop.getTime() - start.getTime();
+            });
+            t.start();
+            threads.add(t);
+        }
+        for (Thread t : threads) {
+            t.join();
+        }
+
+        System.out.println("Digest concurrence performance result:");
+        System.out.println("threads: " + threadCounts);
+        System.out.println("counts per thread: " + counts);
+        System.out.println("errors: " + errors.get());
+        System.out.println("average time: " + this.average(costs));
+        System.out.println("average rate: " + this.averageRate(costs, counts));
+        System.out.println("top rate: " + this.averageRate(costs, counts) * threadCounts);
+
+        if (null != exception[0]) {
+            exception[0].printStackTrace();
+        }
+    }
+
+    private float average(long[] values) {
+        float total = 0.0f;
+        for (long v : values) {
+            total += v;
+        }
+
+        return total / values.length;
+    }
+
+    private float averageRate(long[] costs, int perCounts) {
+        float totalRate = 0.0f;
+
+        for (long v : costs) {
+            totalRate += (float) perCounts / v * 1000;
+        }
+
+        return totalRate / costs.length;
     }
 }
