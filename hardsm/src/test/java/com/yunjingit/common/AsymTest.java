@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.yunjingit.common.Sm.KeyPair;
 
@@ -172,15 +173,21 @@ public class AsymTest {
         ArrayList<Thread> threads = new ArrayList<>();
         final Exception[] exception = {null};
         final long[] costs = new long[threadCounts];
+        List<List<String>> signatures = new ArrayList<>();
+        for (int i = 0; i < threadCounts; i++) {
+            signatures.add(new ArrayList<String>());
+        }
 
         for (int i = 0; i < threadCounts; i++) {
             int pipeIndex = i;
+            List<String> sigs = signatures.get(i);
             Thread t = new Thread(() -> {
                 Date start = new Date();
 
                 for (int j = 0; j < counts; j++) {
                     try {
-                        hardSM.apiSign(0, pipeIndex, keyPair.getPrivateKey(), originData);
+                        String signature = hardSM.apiSign(0, pipeIndex, keyPair.getPrivateKey(), originData);
+                        sigs.add(signature);
                     } catch (SMException e) {
                         errors.incrementAndGet();
                         exception[0] = e;
@@ -197,10 +204,22 @@ public class AsymTest {
             t.join();
         }
 
+        // verify
+        int verifyErrors = 0;
+        for (List<String> l : signatures) {
+            for (String s : l) {
+                int result = this.hardSM.apiVerify(0, 0, keyPair.getPublicKey(), originData, s);
+                if (0 != result) {
+                    verifyErrors++;
+                }
+            }
+        }
+
         System.out.println("Sign concurrence performance result:");
         System.out.println("threads: " + threadCounts);
         System.out.println("counts per thread: " + counts);
         System.out.println("errors: " + errors.get());
+        System.out.println("verify errors: " + verifyErrors);
         System.out.println("average time: " + this.average(costs));
         System.out.println("average rate: " + this.averageRate(costs, counts));
         System.out.println("top rate: " + this.averageRate(costs, counts) * threadCounts);

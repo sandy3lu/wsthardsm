@@ -33,7 +33,8 @@ public class HardSMImpl implements HardSM {
             throw new FailedLoadLibError(e);
         } finally {
             if (null != file) {
-                file.delete();
+                file.deleteOnExit();
+                // delete directly may cause core dump, so delete on exit
             }
         }
         this.normalBuf = new byte[threads][];
