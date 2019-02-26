@@ -83,7 +83,10 @@ public class HardSMMockImpl implements HardSM {
 
     @Override
     public KeyPair apiGenerateKeyPair(int device_index, int pipe_index) throws SMException {
-        return KeyPair.getDefaultInstance();
+        com.yunjingit.common.Sm.KeyPair.Builder builder = KeyPair.newBuilder();
+        builder.setPrivateKey("559ba1bfa6cdb845388f0fa07cc714376840fc92cf777ee264673fdd8cf99ce5");
+        builder.setPublicKey("f8b4732c9dac6e007f1615bdb52344050046df7c4d6ea14c4cd9912aea82c593b90bb3a6927b681bdfe3590f0edef1df10350fb03070cd4dcdaec38b1bb2366b");
+        return builder.build();
     }
 
     @Override

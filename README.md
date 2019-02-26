@@ -34,7 +34,11 @@ mvn test
 mvn package
 
 # 生成打包文件，并跳过单元测试
-mvn package -Dmaven.test.skip=true 
+mvn package -Dmaven.test.skip=true
+
+# 生成无依赖打包文件，并跳过单元测试
+mvn package -Dmaven.test.skip=true assembly:single
+
 
 # 运行
 java -jar target/hardsm-0.0.1-SNAPSHOT.jar
@@ -42,7 +46,10 @@ java -jar target/hardsm-0.0.1-SNAPSHOT.jar
 
 
 ## 使用方式
-
+该程序包既是一个调用库，也能通过 CLI 直接作为程序使用，进行简单的密码算法调用。执行方式如下:
+```
+java -jar hardsm-0.0.3.jar
+```
 
 ## API 说明
 
