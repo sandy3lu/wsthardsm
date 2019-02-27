@@ -16,7 +16,12 @@ public class RandomTest {
     public void testRandomOk() throws SMException {
         for (int i = 0; i < this.deviceCount; i++) {
             assertEquals(13 * 2, this.hardSM.apiRandom(i, 0, 13).length());
-            assertEquals(13 * 2, this.hardSM.apiRandom(i, this.hardSM.getThreads() - 1, 13).length());
+            assertEquals(13 * 2, this.hardSM.apiRandom(i, 1, 13).length());
+            assertEquals(13 * 2, this.hardSM.apiRandom(i, -1, 13).length());
+            assertEquals(13 * 2, this.hardSM.apiRandom(i, 31, 13).length());
+            assertEquals(13 * 2, this.hardSM.apiRandom(i, 32, 13).length());
+            assertEquals(13 * 2, this.hardSM.apiRandom(i, 99, 13).length());
+            assertEquals(13 * 2, this.hardSM.apiRandom(i, -99, 13).length());
         }
     }
 

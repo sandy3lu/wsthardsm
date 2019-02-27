@@ -168,7 +168,7 @@ public class AsymTest {
         KeyPair keyPair = this.hardSM.apiGenerateKeyPair(0, 0);
 
         int counts = 10000;
-        int threadCounts = this.hardSM.getThreads();
+        int threadCounts = 10;
         AtomicInteger errors = new AtomicInteger(0);
         ArrayList<Thread> threads = new ArrayList<>();
         final Exception[] exception = {null};
@@ -179,7 +179,8 @@ public class AsymTest {
         }
 
         for (int i = 0; i < threadCounts; i++) {
-            int pipeIndex = i;
+            int thread = i;
+            int pipeIndex = i % 32;
             List<String> sigs = signatures.get(i);
             Thread t = new Thread(() -> {
                 Date start = new Date();
@@ -195,7 +196,7 @@ public class AsymTest {
                 }
 
                 Date stop = new Date();
-                costs[pipeIndex] = stop.getTime() - start.getTime();
+                costs[thread] = stop.getTime() - start.getTime();
             });
             t.start();
             threads.add(t);
@@ -229,6 +230,7 @@ public class AsymTest {
         }
     }
 
+    @Ignore
     @Test
     public void testVerifyConcurrence() throws InterruptedException, SMException {
         String originData = "0123456701234567012345670123456701234567012345670123456701234567";
@@ -236,7 +238,7 @@ public class AsymTest {
         String signature = this.hardSM.apiSign(0, 0, keyPair.getPrivateKey(), originData);
 
         int counts = 10000;
-        int threadCounts = this.hardSM.getThreads();
+        int threadCounts = 10;
         AtomicInteger errors = new AtomicInteger(0);
         ArrayList<Thread> threads = new ArrayList<>();
         final Exception[] exception = {null};

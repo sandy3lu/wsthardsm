@@ -14,7 +14,7 @@ public class SMTest {
 
     @BeforeClass
     public static void initResource() throws SMException {
-        hardSM = new HardSMImpl(26);
+        hardSM = new HardSMImpl();
         hardSM.apiInit();
         CtxInfo ctxInfo = hardSM.apiCtxInfo();
         deviceCount = ctxInfo.getDeviceCount();

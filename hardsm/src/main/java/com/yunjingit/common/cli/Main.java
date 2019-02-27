@@ -18,7 +18,7 @@ public class Main {
 
         args = Arrays.copyOfRange(args, 2, args.length);
 
-        HardSM hardSM = new HardSMImpl(30);
+        HardSM hardSM = new HardSMImpl();
         hardSM.apiInit();
         hardSM.apiLoginDevice(0, password);
 

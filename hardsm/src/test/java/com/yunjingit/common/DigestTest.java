@@ -27,8 +27,12 @@ public class DigestTest {
     public void testDigestOk() throws SMException {
         for (int i = 0; i < this.deviceCount; i++) {
             assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 0, this.dataAbc.getBytes()));
-            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i,
-                this.hardSM.getThreads() - 1, this.dataAbc.getBytes()));
+            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, -1, this.dataAbc.getBytes()));
+            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 1, this.dataAbc.getBytes()));
+            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 31, this.dataAbc.getBytes()));
+            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 32, this.dataAbc.getBytes()));
+            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, 99, this.dataAbc.getBytes()));
+            assertEquals(this.dataAbcHexDigest, this.hardSM.apiDigest(i, -99, this.dataAbc.getBytes()));
         }
     }
 
@@ -197,14 +201,15 @@ public class DigestTest {
     @Test
     public void testDigestConcurrence() throws InterruptedException {
         int counts = 10000;
-        int threadCounts = this.hardSM.getThreads();
+        int threadCounts = 26;
         AtomicInteger errors = new AtomicInteger(0);
         ArrayList<Thread> threads = new ArrayList<>();
         final Exception[] exception = {null};
         final long[] costs = new long[threadCounts];
 
         for (int i = 0; i < threadCounts; i++) {
-            int pipeIndex = i;
+            int thread = i;
+            int pipeIndex = 0;
 
             Thread t = new Thread(() -> {
                 Date start = new Date();
@@ -221,7 +226,7 @@ public class DigestTest {
                 }
 
                 Date stop = new Date();
-                costs[pipeIndex] = stop.getTime() - start.getTime();
+                costs[thread] = stop.getTime() - start.getTime();
             });
             t.start();
             threads.add(t);

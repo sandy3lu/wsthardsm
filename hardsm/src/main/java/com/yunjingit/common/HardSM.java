@@ -5,7 +5,6 @@ import com.yunjingit.common.Sm.DevStatus;
 import com.yunjingit.common.Sm.KeyPair;
 
 public interface HardSM {
-    int getThreads();
 
     void apiInit() throws SMException;
 
@@ -22,7 +21,6 @@ public interface HardSM {
     DevStatus apiDeviceStatus(int deviceIndex) throws SMException;
 
     void apiProtectKey(boolean flag) throws SMException;
-
 
     String apiDigest(int device_index, int pipe_index, byte[] data) throws SMException;
 

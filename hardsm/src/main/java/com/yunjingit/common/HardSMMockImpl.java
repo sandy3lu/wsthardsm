@@ -7,11 +7,6 @@ import com.yunjingit.common.Sm.KeyPair;
 public class HardSMMockImpl implements HardSM {
 
     @Override
-    public int getThreads() {
-        return 0;
-    }
-
-    @Override
     public void apiInit() throws SMException {
 
     }
