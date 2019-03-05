@@ -15,6 +15,7 @@ public interface HardSM {
     CtxInfo apiCtxInfo() throws SMException;
 
     void apiLoginDevice(int deviceIndex, String pinCode) throws SMException;
+    void apiLoginDevicePipe(int deviceIndex, String pinCode, int pipes) throws SMException;
 
     void apiLogoutDevice(int deviceIndex) throws SMException;
 

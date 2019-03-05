@@ -57,6 +57,8 @@ int ctx_free_device(int index);
  * 一次性打开所有通道，是为了上层以多线程方式调用加密卡，充分利用加密卡资源，提升性能。
  * 该函数也是幂等的，可重复调用，无副作用。*/
 int ctx_open_all_pipes(int index);
+int ctx_open_pipes(int index, int pipe);
+
 
 /* 关闭某个加密卡上的所有安全通道，满足幂等性 */
 int ctx_close_all_pipes(int index);

@@ -32,6 +32,10 @@ public class HardSMMockImpl implements HardSM {
     }
 
     @Override
+    public void apiLoginDevicePipe(int deviceIndex, String pinCode, int pipes) throws SMException{
+
+    }
+    @Override
     public void apiLogoutDevice(int deviceIndex) throws SMException {
 
     }

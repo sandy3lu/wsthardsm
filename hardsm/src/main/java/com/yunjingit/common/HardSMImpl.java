@@ -1,12 +1,13 @@
 package com.yunjingit.common;
 
-import java.io.File;
-import java.util.Arrays;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.sun.jna.Native;
 import com.yunjingit.common.Sm.CtxInfo;
 import com.yunjingit.common.Sm.DevStatus;
 import com.yunjingit.common.Sm.KeyPair;
+
+import java.io.File;
+import java.util.Arrays;
 
 /**
  * HarmSMImpl is thread safe
@@ -97,6 +98,19 @@ public class HardSMImpl implements HardSM {
             throw new ProtobufError(e);
         }
     }
+
+    public void apiLoginDevicePipe(int deviceIndex, String pinCode, int pipes) throws SMException {
+        try {
+            byte[] buf = new byte[NORMAL_BUF_SIZE];
+            int i = this.solib.api_login_device_pipe(deviceIndex, pinCode, buf, pipes);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
 
     @Override
     public void apiLogoutDevice(int deviceIndex) throws SMException {

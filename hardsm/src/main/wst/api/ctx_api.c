@@ -62,6 +62,7 @@ fail:
     return fail_response(&response, error_code, out);
 }
 
+
 int api_close_device(int device_index, uint8_t *out) {
     int error_code = YERR_SUCCESS;
     Response response = RESPONSE__INIT;
@@ -97,6 +98,32 @@ fail:
     ctx_free_device(device_index);
     return fail_response(&response, error_code, out);
 }
+
+// change by lr
+int api_login_device_pipe(int device_index, const char *pin_code, uint8_t *out, int pipe) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+
+    error_code = ctx_open_device(device_index);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    error_code = ctx_check_device(device_index);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    error_code = ctx_open_pipes(device_index, pipe);// add a param
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    error_code = ctx_login(device_index, pin_code);
+    if (error_code != YERR_SUCCESS) goto fail;
+
+    return empty_response(&response, out);
+
+fail:
+    ctx_free_device(device_index);
+    return fail_response(&response, error_code, out);
+}
+
+
 
 int api_logout_device(int device_index, uint8_t *out) {
     int error_code = YERR_SUCCESS;

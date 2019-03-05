@@ -37,6 +37,7 @@ int api_close_device(int device_index, uint8_t *out);
  * const char *pin_code: 设备密钥口令 */
  // return: None
 int api_login_device(int device_index, const char *pin_code, uint8_t *out);
+int api_login_device_pipe(int device_index, const char *pin_code, uint8_t *out, int pipe);
 
 /* 登出设备，并释放设备的相关资源 */
 // return: None

@@ -13,6 +13,8 @@ public interface CSMApi extends Library {
 
     int api_login_device(int deviceIndex, String pinCode, byte[] out);
 
+    int api_login_device_pipe(int deviceIndex, String pinCode, byte[] out, int pipe);
+
     int api_logout_device(int deviceIndex, byte[] out);
 
     int api_device_status(int device_index, byte[] out);
@@ -34,10 +36,10 @@ public interface CSMApi extends Library {
     int api_generate_keypair(int device_index, int pipe_index, byte[] out);
 
     int api_encrypt(int device_index, int pipe_index, String hex_key, String hex_iv,
-        byte[] data, int data_len, byte[] out);
+                    byte[] data, int data_len, byte[] out);
 
     int api_decrypt(int device_index, int pipe_index, String hex_key, String hex_iv,
-        byte[] data, int data_len, byte[] out);
+                    byte[] data, int data_len, byte[] out);
 
     int api_encrypt_init(int device_index, int pipe_index, String hex_key, String hex_iv, byte[] out);
 

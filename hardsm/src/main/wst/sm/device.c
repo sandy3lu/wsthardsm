@@ -15,7 +15,7 @@ static int open_device(DeviceContext *device_context) {
     if (YERR_SUCCESS == check_device_opened(device_context)) return YERR_SUCCESS;
 
     SM_DEVICE_HANDLE h_device = NULL;
-    int error_code = SM_OpenDevice(device_context->index, true, &h_device);
+    int error_code = SM_OpenDevice(device_context->index, false, &h_device);
     if (error_code == YERR_SUCCESS) {
         device_context->h_device = h_device;
     }

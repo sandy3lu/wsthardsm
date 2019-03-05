@@ -156,16 +156,36 @@ int ctx_open_all_pipes(int index) {
                                   &public_key_count, &private_key_count);
     if (error_code != YERR_SUCCESS) return error_code;
 
+    error_code = pp_open_pipe(device_context, free_pipes_count/2);
+    return error_code;
+}
+
+int ctx_open_pipes(int index, int pipe) {
+    int error_code = check_device_index(index);
+    if (error_code != YERR_SUCCESS)  return error_code;
+
+    int pipes_count = 0;
+    int free_pipes_count = 0;
+    int secret_key_count, public_key_count, private_key_count;
+    DeviceContext *device_context = &(g_crypto_context.device_list[index]);
+    error_code = dev_status_count(device_context, &pipes_count, &free_pipes_count, &secret_key_count,
+                                  &public_key_count, &private_key_count);
+    if (error_code != YERR_SUCCESS) return error_code;
+    if(free_pipes_count>pipe){
+      free_pipes_count = pipe;
+    }
     error_code = pp_open_pipe(device_context, free_pipes_count);
     return error_code;
 }
+
+
 
 int ctx_close_all_pipes(int index) {
     int error_code = check_device_index(index);
     if (error_code != YERR_SUCCESS)  return error_code;
 
     DeviceContext *device_context = &(g_crypto_context.device_list[index]);
-    return pp_close_all_pipe(device_context);
+    return pp_close_pipe(device_context);//pp_close_all_pipe(device_context);
 }
 
 int ctx_destroy_keys(int index) {
@@ -182,7 +202,7 @@ int ctx_destroy_keys(int index) {
         h_key = device_context->h_keys[i];
         if (h_pipe != NULL && h_key != NULL) {
             int ret = key_destroy_key(h_pipe, h_key);
-            if (error_code == YERR_SUCCESS) {
+            if (ret == YERR_SUCCESS) {
                 device_context->h_keys[i] = NULL;
                 error_code = ret;
             }
