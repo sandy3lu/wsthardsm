@@ -33,6 +33,9 @@ int init_crypto_context() {
     init_mac_algorithm();
     init_sign_algorithm();
     init_verify_algorithm();
+    init_encrypt_algorithm();
+    init_decrypt_algorithm();
+
     return YERR_SUCCESS;
 }
 
@@ -338,6 +341,70 @@ static int make_crypt_algorithm(SM_ALGORITHM *algorithm, const char *hex_iv) {
 
     return YERR_SUCCESS;
 }
+
+//add by lr
+int crypto_ecc_enc(SM_PIPE_HANDLE h_pipe, const char *hex_key,
+         const char *hex_data,char *hex_out, int hex_out_len) {    
+  if (strlen(hex_key) != SMMA_ECC_FP_256_PUBLIC_KEY_LEN * 2) return KEY_LENGTH_INVALID;   
+  char public_key[SMMA_ECC_FP_256_PUBLIC_KEY_LEN] = {0};
+  int pubkey_len = 0;
+  from_hex(public_key, &pubkey_len,  hex_key);  
+  char data[1024] = {0};
+  int data_len = 0;
+  from_hex(data, &data_len, hex_data);
+              
+  SM_BLOB_KEY blob_key;
+  memset(&blob_key, 0, sizeof(SM_BLOB_KEY));
+  blob_key.pbyData = (PSM_BYTE)public_key;
+  blob_key.uiDataLen = (SM_UINT)pubkey_len;
+        
+  SM_BLOB_ECCCIPHER	stEccCipher;
+  memset(&stEccCipher, 0, sizeof(SM_BLOB_ECCCIPHER));
+  int error_code = SM_ECCEncrypt(h_pipe, &blob_key, &g_encrypt_algorithm,
+                               (PSM_BYTE)data, (SM_UINT)data_len, &stEccCipher);
+  if (error_code != YERR_SUCCESS) return error_code;
+
+  SM_UINT uiCipherLen = 0;
+  uiCipherLen = stEccCipher.uiCheckDataLen + stEccCipher.uiCipherDataLen + stEccCipher.uiSessionKeyLen;
+  char out[2048] = {0};
+  int out_len = uiCipherLen;
+  stEccCipher.pbyData = (PSM_BYTE)out;	
+  error_code = SM_ECCEncrypt(h_pipe, &blob_key, &g_encrypt_algorithm,
+                                (PSM_BYTE)data, (SM_UINT)data_len, &stEccCipher);
+                                                                                                	                                          
+  if (error_code != YERR_SUCCESS) return error_code;
+  to_hex(hex_out, hex_out_len, out, out_len);
+  return YERR_SUCCESS;
+}
+
+
+int crypto_ecc_dec(SM_PIPE_HANDLE h_pipe, PSM_KEY_HANDLE ph_key,
+                   const char *hex_data, char *hex_out, int hex_out_len) {
+                                                                                                          	                                                                                  
+   SM_BLOB_KEY blob_key;
+   int error_code = make_blob_key(&blob_key, ph_key);
+   if (error_code != YERR_SUCCESS) return error_code;
+   char data[2048] = {0};
+   int data_len = 0;
+   from_hex(data, &data_len, hex_data);
+                                                       	                                                                                                              
+   SM_BLOB_ECCCIPHER	stECCCipher;
+   stECCCipher.pbyData = (SM_BYTE*)data;
+   stECCCipher.uiCheckDataLen = SMMA_SCH_256_LEN;
+                                                                                                                                              	                                                                                                                           	stECCCipher.uiSessionKeyLen = SMMA_ECC_FP_256_PUBLIC_KEY_LEN;
+  stECCCipher.uiCipherDataLen = data_len-SMMA_SCH_256_LEN-SMMA_ECC_FP_256_PUBLIC_KEY_LEN;
+  SM_UINT             uiPlainDataLen = 0;
+                                                                                                                            	                                                                                                                           		        error_code = SM_ECCDecrypt(h_pipe, &blob_key, &g_decrypt_algorithm,&stECCCipher, SM_NULL, &uiPlainDataLen);
+  if (error_code != YERR_SUCCESS) return error_code;
+  char out[2048] = {0};
+  int out_len = uiPlainDataLen;
+  error_code = SM_ECCDecrypt(h_pipe, &blob_key, &g_decrypt_algorithm,&stECCCipher, (SM_BYTE*)out, &uiPlainDataLen);
+  if (error_code != YERR_SUCCESS) return error_code;
+  to_hex(hex_out, hex_out_len, out, out_len);
+  return YERR_SUCCESS;
+}
+
+
 
 /*
  * uiSessionKeyLen: 4 bytes

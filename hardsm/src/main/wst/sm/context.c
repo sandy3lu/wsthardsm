@@ -539,7 +539,32 @@ int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *v
     return crypto_ecc_verify(h_pipe, hex_key, verify_result, hex_data, hex_signature);
 }
 
+//add by lr
+int ctx_ecc_dec(int device_index, int pipe_index, const char *hex_key,
+                 const char *hex_data, char *hex_out, int hex_out_len) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
 
+    SM_KEY_HANDLE h_key = NULL;
+    error_code = key_import_private_key(h_pipe, h_auth_key, hex_key, &h_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    error_code = crypto_ecc_dec(h_pipe, &h_key, hex_data, hex_out, hex_out_len);
+    key_destroy_private_key(h_pipe, h_key);
+    return error_code;
+}
+
+int ctx_ecc_enc(int device_index, int pipe_index, const char *hex_key, 
+                const char *hex_data, char *hex_out, int hex_out_len) {
+    int error_code = YERR_SUCCESS;
+    SM_PIPE_HANDLE h_pipe = NULL;
+    SM_KEY_HANDLE h_auth_key = NULL;
+    error_code = get_pipe_authkey(device_index, pipe_index, &h_pipe, &h_auth_key);
+    if (error_code != YERR_SUCCESS) return error_code;
+    return crypto_ecc_enc(h_pipe, hex_key, hex_data, hex_out, hex_out_len);
+}
 
 
 static int init_statistics() {

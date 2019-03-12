@@ -141,4 +141,14 @@ public class HardSMMockImpl implements HardSM {
         throws SMException {
         return 0;
     }
+
+    @Override
+    public String apiSM2Enc(int device_index, int pipe_index, String hex_key, String hex_data) throws SMException {
+        return null;
+    }
+
+    @Override
+    public String apiSM2Dec(int device_index, int pipe_index, String hex_key, String hex_data) throws SMException {
+        return null;
+    }
 }

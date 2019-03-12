@@ -74,6 +74,8 @@ public class TokenEccPublicKey implements ECPublicKey {
         BigInteger y = new BigInteger(1,ByteUtils.fromHexString(stringy));
 
         org.bouncycastle.math.ec.ECPoint q = curve.createPoint(x,y);
+//        System.out.printf("%s, %s\n %s, %s\n", stringx,stringy,ByteUtils.toHexString(q.getAffineXCoord().getEncoded()),
+//                ByteUtils.toHexString(q.getAffineYCoord().getEncoded()));
         AsymmetricKeyParameter publicKeyinfo = new ECPublicKeyParameters(q,domain);
         try {
             SubjectPublicKeyInfo spk = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(publicKeyinfo);

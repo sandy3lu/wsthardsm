@@ -229,6 +229,47 @@ static void test_sign_verify() {
     }
 }
 
+
+static void test_ecc_enc_dec() {
+    const char *data = origin_data;
+
+    char public_key[1024] = {0};
+    char private_key[1024] = {0};
+    int public_key_len = sizeof(public_key);
+    int private_key_len = sizeof(private_key);
+    char result[1024] = {0};
+    int result_len = sizeof(result);
+
+    int error_code = ctx_generate_keypair(0, 0, public_key, public_key_len, private_key, private_key_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    error_code = ctx_ecc_enc(0, 0, public_key, data, result, result_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+    char dec_result[1024] = {0};
+    int dec_result_len = sizeof(dec_result);
+    error_code = ctx_ecc_dec(0, 0, private_key, result, dec_result,dec_result_len);
+    if (error_code != YERR_SUCCESS) {
+        print_error(error_code);
+        return;
+    }
+
+   if (0 != strcmp(origin_data, dec_result)) {
+        printf("sm2 decrypt error\n");
+    } else {
+        printf("sm2 decrypt success\n");
+    }
+}
+
+
+
+
 static void test_digest_alot() {
     int errors = 0;
     int counts = 10000;
@@ -336,6 +377,7 @@ void test_crypto() {
     test_section_encrypt();
     test_section_decrypt();
     test_sign_verify();
+    test_ecc_enc_dec();
 
     test_digest_alot();
     test_sign_alot();

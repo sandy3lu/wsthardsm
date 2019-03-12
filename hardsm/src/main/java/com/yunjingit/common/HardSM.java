@@ -57,4 +57,10 @@ public interface HardSM {
 
     int apiVerify(int device_index, int pipe_index, String hex_key, String hex_data, String hex_signature)
         throws SMException;
+
+    String apiSM2Enc(int device_index, int pipe_index, String hex_key, String hex_data)
+            throws SMException;
+    String apiSM2Dec(int device_index, int pipe_index, String hex_key, String hex_data)
+            throws SMException;
+
 }

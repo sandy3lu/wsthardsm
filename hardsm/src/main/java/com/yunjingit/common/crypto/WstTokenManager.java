@@ -6,18 +6,26 @@ import com.yunjingit.common.SMException;
 import com.yunjingit.common.Sm;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.digests.SM3Digest;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.engines.SM2Engine;
+import org.bouncycastle.crypto.engines.SM4Engine;
+import org.bouncycastle.crypto.params.*;
 import org.bouncycastle.crypto.signers.SM2Signer;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.custom.gm.SM2P256V1Curve;
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.TestRandomBigInteger;
+
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.Arrays;
 
 
@@ -27,22 +35,53 @@ public class WstTokenManager {
      private int maxThreads;
      HardSM hardSM;
 
+    private  X9ECParameters ecParams = CustomNamedCurves.getByName("sm2p256v1");
+    private  byte[] A = ecParams.getCurve().getA().getEncoded();
+    private  byte[] B = ecParams.getCurve().getB().getEncoded();
+    private  byte[] GX = ecParams.getG().getAffineXCoord().getEncoded();
+    private  byte[] GY = ecParams.getG().getAffineYCoord().getEncoded();
+    private  byte[] userID = Hex.decode("31323334353637383132333435363738");
+    private byte[] PRE_Z;
+    final int SMMA_ECC_FP_256_PUBLIC_KEY_LEN = 32 * 2;
+    private  SM2P256V1Curve curve =new SM2P256V1Curve();
+
     public void initResource(String password, int threads) throws SMException {
         hardSM = new HardSMImpl();
         hardSM.apiInit();
         Sm.CtxInfo ctxInfo = hardSM.apiCtxInfo();
         deviceCount = ctxInfo.getDeviceCount();
+        if(deviceCount == 0){
+            throw new WstTokenException(2300,"no device!");
+        }
         for (int i = 0; i < deviceCount; i++) {
             hardSM.apiLoginDevicePipe(i, password,threads);
         }
         printDeviceStatus();
         maxThreads = threads;
-        return ;
+        PRE_Z = getPreZ(userID);
+    }
+
+    private byte[] getPreZ(byte[] userID) {
+        byte[] zdata = new byte[256];
+        int len = userID.length * 8;
+        zdata[0] = (byte)(len >> 8 & 0xFF);
+        zdata[1] = (byte)(len & 0xFF);
+        System.arraycopy(userID,0,zdata,2,userID.length);
+        int offset = 2 + userID.length;
+
+        System.arraycopy(A,0,zdata,offset,A.length);
+        offset = offset + A.length;
+        System.arraycopy(B,0,zdata,offset,B.length);
+        offset = offset + B.length;
+        System.arraycopy(GX,0,zdata,offset,GX.length);
+        offset = offset + GX.length;
+        System.arraycopy(GY,0,zdata,offset,GY.length);
+        offset = offset + GY.length;
+        return Arrays.copyOf(zdata,offset);
     }
 
     @Override
     public void finalize() {
-
         try {
             printDeviceStatus();
             for (int i = 0; i < deviceCount; i++) {
@@ -52,8 +91,6 @@ public class WstTokenManager {
         } catch (Exception e) {
            e.printStackTrace();
         }
-
-        return ;
     }
 
     private  int printDeviceStatus() throws SMException {
@@ -127,6 +164,37 @@ public class WstTokenManager {
         }
     }
 
+    private static int SM4_KEY_LENGTH = 16;
+    public byte[] sm4Enc(boolean forEncrption, byte[] data, byte[] iv, String hexKey)throws  WstTokenException{
+
+        int deviceindex = getDeviceIndex();
+        int pipeindex = getPipeIndex();
+        try {
+            String hexiv=null;
+            if(iv!=null){
+                if(iv.length!=SM4_KEY_LENGTH){
+                    throw new WstTokenException(22,"iv length should be "+SM4_KEY_LENGTH);
+                }
+                hexiv = ByteUtils.toHexString(iv);
+            }else{
+                int length = data.length;
+                int left = length % SM4_KEY_LENGTH;
+                if(left!=0){
+                    throw new WstTokenException(22,"data length should be N * "+SM4_KEY_LENGTH);
+                }
+            }
+            if (forEncrption) {
+                byte[] result = hardSM.apiEncrypt(deviceindex, pipeindex, hexKey, hexiv, data);
+                return result;
+            } else {
+                byte[] result = hardSM.apiDecrypt(deviceindex, pipeindex, hexKey, hexiv, data);
+                return result;
+            }
+        }catch (Exception e){
+            throw new WstTokenException(e);
+        }
+    }
+
     public String apiDigest( byte[] data) throws WstTokenException {
         try {
             int deviceindex = getDeviceIndex();
@@ -144,7 +212,6 @@ public class WstTokenManager {
             int deviceindex = getDeviceIndex();
             int pipeindex = getPipeIndex();
             return hardSM.apiSign(deviceindex,pipeindex,privateKey,hexData);
-
         } catch (Exception e) {
             throw new WstTokenException(e);
         }
@@ -157,22 +224,15 @@ public class WstTokenManager {
             int deviceindex = getDeviceIndex();
             int pipeindex = getPipeIndex();
             return hardSM.apiVerify(deviceindex,pipeindex,publicKey, hexData, signature);
-
         } catch (Exception e) {
             throw new WstTokenException(e);
         }
     }
 
-    private  X9ECParameters ecParams = CustomNamedCurves.getByName("sm2p256v1");
-    private  byte[] A = ecParams.getCurve().getA().getEncoded();
-    private  byte[] B = ecParams.getCurve().getB().getEncoded();
-    private  byte[] GX = ecParams.getG().getAffineXCoord().getEncoded();
-    private  byte[] GY = ecParams.getG().getAffineYCoord().getEncoded();
 
-    private static byte[] userID = Hex.decode("31323334353637383132333435363738");
 
     public byte[] sm2Sign(byte[] data, String privkey, String pubkey){
-        byte[] z = getZ(userID,pubkey);
+        byte[] z = getZfinal(pubkey);
         byte[] indata = new byte[z.length + data.length];
         System.arraycopy(z,0,indata,0,z.length);
         System.arraycopy(data,0,indata,z.length,data.length);
@@ -183,7 +243,7 @@ public class WstTokenManager {
 
     public boolean sm2Verify(byte[] data, byte[] sig,String pubkey){
         String sigHex = translateRSToSigHex(sig);
-        byte[] z = getZ(userID,pubkey);
+        byte[] z = getZfinal(pubkey);
         byte[] indata = new byte[z.length + data.length];
         System.arraycopy(z,0,indata,0,z.length);
         System.arraycopy(data,0,indata,z.length,data.length);
@@ -196,8 +256,30 @@ public class WstTokenManager {
         }
     }
 
-    final int SMMA_ECC_FP_256_PUBLIC_KEY_LEN = 32 * 2;
-    private  SM2P256V1Curve curve =new SM2P256V1Curve();
+    public byte[] sm2Enc(byte[] data,String pubkey){
+        try {
+            int deviceindex = getDeviceIndex();
+            int pipeindex = getPipeIndex();
+            String s = ByteUtils.toHexString(data);
+            String sigHex = hardSM.apiSM2Enc(deviceindex,pipeindex, pubkey,s);
+            return ByteUtils.fromHexString("04" + sigHex);
+        } catch (Exception e) {
+            throw new WstTokenException(e);
+        }
+    }
+
+    public byte[] sm2Dec(byte[] data, String privkey){
+        try {
+            int deviceindex = getDeviceIndex();
+            int pipeindex = getPipeIndex();
+            byte[] tmp = Arrays.copyOfRange(data,1,data.length);
+            String s = ByteUtils.toHexString(tmp);
+            String sigHex = hardSM.apiSM2Dec(deviceindex,pipeindex,privkey,s);
+            return ByteUtils.fromHexString(sigHex);
+        }catch (Exception e) {
+            throw new WstTokenException(e);
+        }
+    }
 
     private byte[] getZ(byte[] userID, String pubkey)
     {
@@ -235,16 +317,40 @@ public class WstTokenManager {
         return ByteUtils.fromHexString(s);
     }
 
+    private byte[] getZfinal(String pubkey)
+    {
+        byte[] zdata = new byte[256];
+        int offset = PRE_Z.length;
+        System.arraycopy(PRE_Z,0,zdata,0,offset);
+
+        String stringx =pubkey.substring(0,SMMA_ECC_FP_256_PUBLIC_KEY_LEN);
+        String stringy = pubkey.substring(SMMA_ECC_FP_256_PUBLIC_KEY_LEN);
+
+        BigInteger x = new BigInteger(1, ByteUtils.fromHexString(stringx));
+        BigInteger y = new BigInteger(1,ByteUtils.fromHexString(stringy));
+
+        org.bouncycastle.math.ec.ECPoint q = curve.createPoint(x,y);
+        byte[] tmp = q.getAffineXCoord().getEncoded();
+        System.arraycopy(tmp,0,zdata,offset,tmp.length);
+        offset = offset + tmp.length;
+        tmp = q.getAffineYCoord().getEncoded();
+        System.arraycopy(tmp,0,zdata,offset,tmp.length);
+        offset = offset + tmp.length;
+        tmp = Arrays.copyOf(zdata,offset);
+        String s = apiDigest(tmp);
+        return ByteUtils.fromHexString(s);
+    }
 
     public int test(int length){
         int testOK = 0;
 
+        /** random */
         byte[] random = getRandom(length);
         if(random.length!= length){
             testOK = testOK + 1;
-            
         }
 
+        /** SM3 */
         String d = apiDigest(random);
         byte[] digest = ByteUtils.fromHexString(d);
         SM3Digest sm3 = new SM3Digest();
@@ -253,15 +359,14 @@ public class WstTokenManager {
         byte[] bouncyDigest = new byte[sm3.getDigestSize()];
         sm3.doFinal(bouncyDigest,0);
         if(!Arrays.equals(bouncyDigest,digest)){
-            testOK = testOK + 2; 
-            
+            testOK = testOK + 2;
         }
 
+        /** SM2 sign vs verify */
         Sm.KeyPair kp = apiGenerateKeyPair();
         byte[] sig = sm2Sign(random,kp.getPrivateKey(),kp.getPublicKey());
         if(!sm2Verify(random,sig,kp.getPublicKey())){
             testOK = testOK + 4;
-            
         }
 
         TokenEccPublicKey publicKey= new TokenEccPublicKey(kp.getPublicKey());
@@ -269,7 +374,61 @@ public class WstTokenManager {
         boolean result = verifySM2Bouncy(random, sig, localECPublicKey);
         if(!result){
             testOK = testOK + 8;
-            
+        }
+
+        /**sm2 enc vs dec */
+        byte[] encdate =sm2Enc(random,kp.getPublicKey());
+        byte[] decdata = sm2Dec(encdate,kp.getPrivateKey());
+        if(!Arrays.equals(decdata,random)){
+            testOK = testOK + 16;
+        }
+
+        try {
+            KeyPairGenerator g = KeyPairGenerator.getInstance("EC", "BC");
+            g.initialize(new ECNamedCurveGenParameterSpec("sm2p256v1"));
+            KeyPair p = g.generateKeyPair();
+
+            BCECPublicKey bcecPublicKey = (BCECPublicKey) p.getPublic();
+            ECParameterSpec localECParameterSpec = bcecPublicKey.getParameters();
+            ECDomainParameters localECDomainParameters = new ECDomainParameters(localECParameterSpec.getCurve(),
+                    localECParameterSpec.getG(), localECParameterSpec.getN());
+
+            SM2Engine sm2Engine = new SM2Engine();
+            BCECPrivateKey bcecPrivateKey= (BCECPrivateKey)p.getPrivate();
+            ECPrivateKeyParameters aPriv = new ECPrivateKeyParameters(bcecPrivateKey.getD(),localECDomainParameters);
+            sm2Engine.init(false,aPriv);
+
+            String pubk = TokenEccPublicKey.transformToTokenKey(bcecPublicKey);
+            byte[] encToken =sm2Enc(random,pubk);
+            byte[] decToken = sm2Engine.processBlock(encToken, 0, encToken.length);
+            if(!Arrays.equals(decToken,random)){
+                testOK = testOK + 32;
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        byte[] bouncy =encSM2Bouncy(random,localECPublicKey);
+        byte[] decbouncy = sm2Dec(bouncy,kp.getPrivateKey());
+        if(!Arrays.equals(random,decbouncy)){
+            testOK = testOK + 64;
+        }
+
+        /** SM4 */
+        String key = "0123456789abcdeffedcba9876543210";
+        String expect = "681edf34d206965e86b3e94f536e4246";
+        byte[] sm4enc = sm4Enc(true,ByteUtils.fromHexString(key),null,key);
+        byte[] nopad = Arrays.copyOfRange(sm4enc,0,key.length()/2);
+        if(!ByteUtils.toHexString(nopad).equals(expect)){
+            testOK = testOK + 128;
+            System.out.println(ByteUtils.toHexString(nopad));
+            System.out.println(expect);
+        }
+        byte[] sm4dec = sm4Enc(false,sm4enc,null,key);
+        if(!ByteUtils.toHexString(sm4dec).equals(key)){
+            testOK = testOK + 128;
+            System.out.println(ByteUtils.toHexString(sm4dec));
+            System.out.println(key);
         }
 
         return testOK;
@@ -293,7 +452,6 @@ public class WstTokenManager {
     protected byte[] derEncode(BigInteger r, BigInteger s)
             throws IOException
     {
-
         ASN1EncodableVector v = new ASN1EncodableVector();
         v.add(new ASN1Integer(r));
         v.add(new ASN1Integer(s));
@@ -351,7 +509,6 @@ public class WstTokenManager {
         }
         sb.append(s);
         return sb.toString();
-
     }
 
     public boolean verifySM2Bouncy(byte[] data, byte[] sig, BCECPublicKey localECPublicKey) {
@@ -365,5 +522,24 @@ public class WstTokenManager {
         signer.update(data, 0, data.length);
         return signer.verifySignature(sig);
     }
+
+    public byte[] encSM2Bouncy(byte[] data, BCECPublicKey localECPublicKey) {
+        ECParameterSpec localECParameterSpec = localECPublicKey.getParameters();
+        ECDomainParameters localECDomainParameters = new ECDomainParameters(localECParameterSpec.getCurve(),
+                localECParameterSpec.getG(), localECParameterSpec.getN());
+        ECPublicKeyParameters param = new ECPublicKeyParameters(localECPublicKey.getQ(), localECDomainParameters);
+        ParametersWithRandom pp = new ParametersWithRandom(param, new TestRandomBigInteger("4C62EEFD6ECFC2B95B92FD6C3D9575148AFA17425546D49018E5388D49DD7B4F", 16));
+
+        SM2Engine signer = new SM2Engine();
+        signer.init(true, pp);
+        byte[] result = new byte[0];
+        try {
+            result = signer.processBlock(data, 0, data.length);
+        } catch (InvalidCipherTextException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 
 }

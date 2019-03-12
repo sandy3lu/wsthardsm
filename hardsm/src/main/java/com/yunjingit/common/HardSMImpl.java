@@ -15,6 +15,7 @@ import java.util.Arrays;
 public class HardSMImpl implements HardSM {
     private static final int NORMAL_BUF_SIZE = 256;
     private static final int LARGE_BUF_SIZE = 1024 * 128 + 128;
+    private static final int SM2_BUF_SIZE = 1024 * 3;
     private CSMApi solib;
 
     public HardSMImpl() throws SMException {
@@ -99,6 +100,7 @@ public class HardSMImpl implements HardSM {
         }
     }
 
+    @Override
     public void apiLoginDevicePipe(int deviceIndex, String pinCode, int pipes) throws SMException {
         try {
             byte[] buf = new byte[NORMAL_BUF_SIZE];
@@ -394,6 +396,36 @@ public class HardSMImpl implements HardSM {
             Sm.Response response = Sm.Response.parseFrom(bs);
             this.parseResponse(response);
             return response.getIntValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public String apiSM2Enc(int device_index, int pipe_index, String hex_key, String hex_data)
+            throws SMException {
+        try {
+            byte[] buf = new byte[SM2_BUF_SIZE];
+            int i = this.solib.api_sm2encrypt(device_index, pipe_index, hex_key, hex_data, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ProtobufError(e);
+        }
+    }
+
+    @Override
+    public String apiSM2Dec(int device_index, int pipe_index, String hex_key, String hex_data)
+            throws SMException {
+        try {
+            byte[] buf = new byte[SM2_BUF_SIZE];
+            int i = this.solib.api_sm2decrypt(device_index, pipe_index, hex_key, hex_data, buf);
+            byte[] bs = Arrays.copyOfRange(buf, 0, i);
+            Sm.Response response = Sm.Response.parseFrom(bs);
+            this.parseResponse(response);
+            return response.getStrValue().getValue();
         } catch (InvalidProtocolBufferException e) {
             throw new ProtobufError(e);
         }

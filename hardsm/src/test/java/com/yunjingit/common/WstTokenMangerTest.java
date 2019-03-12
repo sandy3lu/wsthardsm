@@ -15,25 +15,22 @@ public class WstTokenMangerTest {
 
     @Test
     public void testLib(){
-
         Native.setProtected(true);
         System.out.println("Native.isProtected = " +Native.isProtected());
 
         WstTokenManager wstTokenManager = new WstTokenManager();
+	System.out.printf("init ....");
         try {
-            wstTokenManager.initResource("11111111",5);
-            for(int i=0;i<100;i++) {
-
-                boolean result = wstTokenManager.test(16);
-                System.out.println("------- test " + i + " ---- "+ result);
+            wstTokenManager.initResource("11111111",2);
+            for(int i=0;i<1;i++) {
+                int result = wstTokenManager.test(16);
+                System.out.printf("------- test %d -> result %x ---- ", i, result);
             }
         } catch (Exception e) {
             e.printStackTrace();
-
         }finally {
             wstTokenManager.finalize();
         }
-
     }
 
 }

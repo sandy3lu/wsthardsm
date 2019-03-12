@@ -239,3 +239,26 @@ int api_verify(int device_index, int pipe_index, char *hex_key, char *hex_data, 
 fail:
     return fail_response(&response, error_code, out);
 }
+
+// add by lr
+int api_sm2decrypt(int device_index, int pipe_index, char *hex_key, char *hex_data, uint8_t *out) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+    char hex_out[1024*3] = {0};
+    error_code = ctx_ecc_dec(device_index, pipe_index, hex_key, hex_data, hex_out, sizeof(hex_out));
+    if (error_code != YERR_SUCCESS) goto fail;
+    return str_response(&response, hex_out, out);
+fail:
+    return fail_response(&response, error_code, out);
+}
+
+int api_sm2encrypt(int device_index, int pipe_index, char *hex_key, char *hex_data, uint8_t *out) {
+    int error_code = YERR_SUCCESS;
+    Response response = RESPONSE__INIT;
+    char hex_out[1024*3] = {0};
+    error_code = ctx_ecc_enc(device_index, pipe_index, hex_key, hex_data, hex_out, sizeof(hex_out));
+    if (error_code != YERR_SUCCESS) goto fail;
+    return str_response(&response, hex_out, out);
+fail:
+    return fail_response(&response, error_code, out);
+}                                                         

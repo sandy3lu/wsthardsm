@@ -154,6 +154,8 @@ int api_sign(int device_index, int pipe_index, char *hex_key, char *hex_data, ui
 // return: IntValue, 0 表示验签成功，否者验签失败，不同数值代表不同原因
 int api_verify(int device_index, int pipe_index, char *hex_key, char *hex_data, char *hex_signature, uint8_t *out);
 
+int api_sm2decrypt(int device_index, int pipe_index, char *hex_key, char *hex_data, uint8_t *out);
+int api_sm2encrypt(int device_index, int pipe_index, char *hex_key, char *hex_data, uint8_t *out);
 
 #ifdef __cplusplus
 }

@@ -149,7 +149,11 @@ int ctx_ecc_sign(int device_index, int pipe_index, const char *hex_key,
 int ctx_ecc_verify(int device_index, int pipe_index, const char *hex_key, int *verify_result,
                    const char *hex_data, char *hex_signature);
 
+int ctx_ecc_dec(int device_index, int pipe_index, const char *hex_key,
+                 const char *hex_data, char *hex_out, int hex_out_len);
 
+int ctx_ecc_enc(int device_index, int pipe_index, const char *hex_key, 
+                const char *hex_data, char *hex_out, int hex_out_len);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int print_device_context(DeviceContext *device_context, char *buf);
 int print_statistics(CryptoContext *crypto_context, char *buf);
